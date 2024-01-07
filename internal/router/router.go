@@ -1,15 +1,14 @@
 package router
 
 import (
+	"database/sql"
+
 	"github.com/gin-gonic/gin"
+	"github.com/izruff/reviu-backend/internal/routes"
 )
 
-func Setup() *gin.Engine {
+func Setup(db *sql.DB) *gin.Engine {
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	routes.SetupRoutes(r, db)
 	return r
 }
