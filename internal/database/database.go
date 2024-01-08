@@ -8,7 +8,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func OpenDB(dsn string) (*sqlx.DB, error) {
+func OpenPostgresDB(dsn string) (*sqlx.DB, error) {
 	db, err := sqlx.Open("postgres", dsn)
 	if err != nil {
 		return nil, err

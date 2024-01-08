@@ -2,12 +2,13 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/izruff/reviu-backend/internal/api"
 	"github.com/izruff/reviu-backend/internal/routes"
-	"github.com/jmoiron/sqlx"
 )
 
-func Setup(db *sqlx.DB) *gin.Engine {
+func SetupRouter(s *api.APIServer) *gin.Engine {
+	// TODO: configure listening address and other stuff
 	r := gin.Default()
-	routes.SetupRoutes(r, db)
+	routes.SetupRoutes(r, s)
 	return r
 }
