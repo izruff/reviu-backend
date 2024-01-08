@@ -2,14 +2,14 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
-func OpenDB(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", dsn)
+func OpenDB(dsn string) (*sqlx.DB, error) {
+	db, err := sqlx.Open("postgres", dsn)
 	if err != nil {
 		return nil, err
 	}
