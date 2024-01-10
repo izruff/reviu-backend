@@ -6,11 +6,11 @@ import (
 )
 
 type APIHandlers struct {
-	services *services.PostgresServices
+	services *services.APIServices
 }
 
 func NewAPIHandlers(db *sqlx.DB) *APIHandlers {
-	services := services.NewPostgresServices(db)
+	services := services.NewAPIServices(db)
 
 	return &APIHandlers{
 		services: services,

@@ -1,13 +1,18 @@
 package services
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/izruff/reviu-backend/internal/repository"
+	"github.com/jmoiron/sqlx"
+)
 
-type PostgresServices struct {
-	db *sqlx.DB
+type APIServices struct {
+	queries *repository.PostgresQueries
 }
 
-func NewPostgresServices(db *sqlx.DB) *PostgresServices {
-	return &PostgresServices{
-		db: db,
+func NewAPIServices(db *sqlx.DB) *APIServices {
+	queries := repository.NewPostgresQueries(db)
+
+	return &APIServices{
+		queries: queries,
 	}
 }
