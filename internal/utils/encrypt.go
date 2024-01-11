@@ -10,6 +10,6 @@ func GetPasswordHash(plainPassword string) (string, error) {
 	return string(hash), nil
 }
 
-func IsPasswordValid(passwordHash string, plainPassword string) error {
+func AssertValidPassword(plainPassword string, passwordHash string) error {
 	return bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(plainPassword))
 }

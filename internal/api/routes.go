@@ -12,8 +12,8 @@ func SetupRoutes(r *gin.Engine, s *APIServer) {
 
 	// Routes for user authentication
 	auth := r.Group("/auth")
-	auth.POST("/login", s.handlers.LogIn)
-	auth.POST("/signup", s.handlers.SignUp)
+	auth.POST("/login", s.handlers.Login)
+	auth.POST("/signup", s.handlers.Signup)
 
 	// Routes for interacting with the user model
 	users := r.Group("/users")
