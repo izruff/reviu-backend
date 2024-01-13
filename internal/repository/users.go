@@ -2,7 +2,7 @@ package repository
 
 import "github.com/izruff/reviu-backend/internal/models"
 
-func (q *PostgresQueries) CreateUser(newUser *models.User) (int32, error) {
+func (q *PostgresQueries) CreateUser(newUser *models.User) (int64, error) {
 	userID, err := q.create("users", []string{"email", "password_hash", "mod_role", "username"}, true, newUser)
 	if err != nil {
 		return 0, err
@@ -11,38 +11,61 @@ func (q *PostgresQueries) CreateUser(newUser *models.User) (int32, error) {
 	return userID, nil
 }
 
-func (q *PostgresQueries) GetUserByID(id int32) (*models.User, error) {
+func (q *PostgresQueries) GetUserByID(id int64) (*models.User, error) {
 	user := &models.User{}
-	// TODO: see findOne TODO
-	if err := q.selectOne(user, "users", "*", "id=:id", id); err != nil {
+	if err := q.selectOne(user, "users", "*", "id=$1", id); err != nil {
 		return nil, err
 	}
 
 	return user, nil
 }
 
-func (q *PostgresQueries) GetUserIDByEmail(email string) (int32, error) {
-	var userID int32
-	if err := q.selectOne(userID, "users", "id", "email=:email", email); err != nil {
+func (q *PostgresQueries) GetUserIDByEmail(email string) (int64, error) {
+	var userID int64
+	if err := q.selectOne(&userID, "users", "id", "email=$1", email); err != nil {
 		return 0, err
 	}
 
 	return userID, nil
 }
 
-func (q *PostgresQueries) GetUserIDByUsername(username string) (int32, error) {
-	var userID int32
-	if err := q.selectOne(userID, "users", "id", "username=:username", username); err != nil {
+func (q *PostgresQueries) GetUserIDByUsername(username string) (int64, error) {
+	var userID int64
+	if err := q.selectOne(&userID, "users", "id", "username=$1", username); err != nil {
 		return 0, err
 	}
 
 	return userID, nil
 }
 
-func (q *PostgresQueries) UpdateUserByID(id int32, updatedUser *models.User) error {
-	return nil // TODO
+func (q *PostgresQueries) UpdateUserByID(updatedUser *models.User) error {
+	var columns []string
+	if updatedUser.Email.Valid {
+		columns = append(columns, "email")
+	}
+	if updatedUser.PasswordHash.Valid {
+		columns = append(columns, "password_hash")
+	}
+	if updatedUser.ModRole.Valid {
+		columns = append(columns, "mod_role")
+	}
+	if updatedUser.Username.Valid {
+		columns = append(columns, "username")
+	}
+	if updatedUser.Nickname.Valid {
+		columns = append(columns, "nickname")
+	}
+	if updatedUser.About.Valid {
+		columns = append(columns, "about")
+	}
+
+	if err := q.updateByID("users", columns, updatedUser); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (q *PostgresQueries) DeleteUserByID(id int32) error {
+func (q *PostgresQueries) DeleteUserByID(id int64) error {
 	return nil // TODO
 }

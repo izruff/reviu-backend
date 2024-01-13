@@ -1,9 +1,9 @@
 package models
 
-import "time"
+import "gopkg.in/guregu/null.v3"
 
 type Relation struct {
-	FollowerID  int32     `db:"follower_id" json:"followerId"`
-	FollowingID int32     `db:"following_id" json:"followingId"`
-	CreatedAt   time.Time `db:"created_at" json:"createdAt"`
+	FollowerID  null.Int  `db:"follower_id" json:"followerId"`
+	FollowingID null.Int  `db:"following_id" json:"followingId"`
+	CreatedAt   null.Time `db:"created_at" json:"createdAt"`
 }

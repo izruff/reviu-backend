@@ -1,9 +1,9 @@
 package models
 
-import "time"
+import "gopkg.in/guregu/null.v3"
 
 type Subscription struct {
-	TopicID   int32     `db:"topic_id" json:"topicId"`
-	UserID    int32     `db:"user_id" json:"userId"`
-	CreatedAt time.Time `db:"created_at" json:"createdAt"`
+	TopicID   null.Int  `db:"topic_id" json:"topicId"`
+	UserID    null.Int  `db:"user_id" json:"userId"`
+	CreatedAt null.Time `db:"created_at" json:"createdAt"`
 }

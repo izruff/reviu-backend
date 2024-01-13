@@ -1,14 +1,14 @@
 package models
 
-import "database/sql"
+import "gopkg.in/guregu/null.v3"
 
 type User struct {
-	ID           sql.NullInt32  `db:"id" json:"id"`
-	Email        sql.NullString `db:"email" json:"email"`
-	PasswordHash sql.NullString `db:"password_hash" json:"passwordHash"`
-	ModRole      sql.NullBool   `db:"mod_role" json:"modRole"`
-	Username     sql.NullString `db:"username" json:"username"`
-	Nickname     sql.NullString `db:"nickname" json:"nickname"`
-	About        sql.NullString `db:"about" json:"about"`
-	CreatedAt    sql.NullTime   `db:"created_at" json:"createdAt"`
+	ID           null.Int    `db:"id" json:"id"`
+	Email        null.String `db:"email" json:"email"`
+	PasswordHash null.String `db:"password_hash" json:"passwordHash"`
+	ModRole      null.Bool   `db:"mod_role" json:"modRole"`
+	Username     null.String `db:"username" json:"username"`
+	Nickname     null.String `db:"nickname" json:"nickname"`
+	About        null.String `db:"about" json:"about"`
+	CreatedAt    null.Time   `db:"created_at" json:"createdAt"`
 }

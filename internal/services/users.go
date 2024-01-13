@@ -5,6 +5,7 @@ import (
 
 	"github.com/izruff/reviu-backend/internal/models"
 	"github.com/izruff/reviu-backend/internal/utils"
+	"gopkg.in/guregu/null.v3"
 )
 
 func isValidEmail(email string) bool {
@@ -12,8 +13,8 @@ func isValidEmail(email string) bool {
 	return emailRegex.MatchString(email)
 }
 
-func (s *APIServices) Login(usernameOrEmail string, password string) (int32, string, *SvcError) {
-	var userID int32
+func (s *APIServices) Login(usernameOrEmail string, password string) (int64, string, *SvcError) {
+	var userID int64
 	var err error
 	switch isValidEmail(usernameOrEmail) {
 	case true:
@@ -40,17 +41,17 @@ func (s *APIServices) Login(usernameOrEmail string, password string) (int32, str
 	return userID, token, nil
 }
 
-func (s *APIServices) Signup(email string, username string, password string) (int32, string, *SvcError) {
+func (s *APIServices) Signup(email string, username string, password string) (int64, string, *SvcError) {
 	passwordHash, err := utils.GetPasswordHash(password)
 	if err != nil {
 		return 0, "", newErrInternal(err)
 	}
 
 	newUser := &models.User{
-		Email:        *NewString(email),
-		Username:     *NewString(username),
-		PasswordHash: *NewString(passwordHash),
-		ModRole:      *NewBool(false),
+		Email:        null.NewString(email, true),
+		Username:     null.NewString(username, true),
+		PasswordHash: null.NewString(passwordHash, true),
+		ModRole:      null.NewBool(false, true),
 	}
 
 	userID, err := s.queries.CreateUser(newUser)
@@ -63,4 +64,25 @@ func (s *APIServices) Signup(email string, username string, password string) (in
 	token := ""
 
 	return userID, token, nil
+}
+
+func (s *APIServices) GetUserByID(id int64) (*models.User, *SvcError) {
+	user, err := s.queries.GetUserByID(id)
+	if err != nil {
+		// TODO: error handling when user does not exist
+		return nil, newErrInternal(err)
+	}
+
+	return user, nil
+}
+
+func (s *APIServices) UpdateUserByID(id int64, updatedUser *models.User) *SvcError {
+	updatedUser.ID.Int64 = id
+	updatedUser.ID.Valid = true
+	if err := s.queries.UpdateUserByID(updatedUser); err != nil {
+		// TODO: error handling when user does not exist
+		return newErrInternal(err)
+	}
+
+	return nil
 }

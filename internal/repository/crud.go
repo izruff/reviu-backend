@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (q *PostgresQueries) create(table string, columns []string, returningID bool, modelInstance interface{}) (int32, error) {
+func (q *PostgresQueries) create(table string, columns []string, returningID bool, modelInstance interface{}) (int64, error) {
 	query := "INSERT INTO " + table + " (" + strings.Join(columns, ",") + ") VALUES (:" + strings.Join(columns, ",:") + ")"
 	if returningID {
 		query += " RETURNING id"
@@ -18,7 +18,7 @@ func (q *PostgresQueries) create(table string, columns []string, returningID boo
 		}
 
 		var dest struct {
-			ID int32 `db:"id"`
+			ID int64 `db:"id"`
 		}
 		rows.Next()
 		if err := rows.StructScan(&dest); err != nil {
@@ -46,14 +46,12 @@ func (q *PostgresQueries) selectAll(dest []interface{}, table string, column str
 
 func (q *PostgresQueries) selectOne(dest interface{}, table string, column string, whereQuery string, whereArgs ...interface{}) error {
 	if err := q.db.Get(dest, "SELECT "+column+" FROM "+table+" WHERE "+whereQuery, whereArgs...); err != nil {
-		// TODO: fix this, according to docs it returns error if result set is empty
 		return err
 	}
 
 	return nil
 }
 
-// TODO: should detect only properties with non-null value
 func (q *PostgresQueries) updateByID(table string, columns []string, modelInstance interface{}) error {
 	var setSlice []string
 	for _, col := range columns {
@@ -69,7 +67,7 @@ func (q *PostgresQueries) updateByID(table string, columns []string, modelInstan
 	return nil
 }
 
-func (q *PostgresQueries) deleteByID(table string, id int32) error {
+func (q *PostgresQueries) deleteByID(table string, id int64) error {
 	result, err := q.db.Exec("DELETE FROM"+table+"WHERE id = $1", id)
 	if err != nil {
 		return err

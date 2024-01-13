@@ -1,10 +1,10 @@
 package models
 
-import "time"
+import "gopkg.in/guregu/null.v3"
 
 type Topic struct {
-	ID        int32     `db:"id" json:"id"`
-	Topic     string    `db:"topic" json:"topic"`
-	Hub       string    `db:"hub" json:"hub"`
-	CreatedAt time.Time `db:"created_at" json:"createdAt"`
+	ID        null.Int    `db:"id" json:"id"`
+	Topic     null.String `db:"topic" json:"topic"`
+	Hub       null.String `db:"hub" json:"hub"`
+	CreatedAt null.Time   `db:"created_at" json:"createdAt"`
 }

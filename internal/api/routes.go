@@ -18,6 +18,9 @@ func SetupRoutes(r *gin.Engine, s *APIServer) {
 	// Routes for interacting with the user model
 	users := r.Group("/users")
 	user := users.Group("/id/:userID")
-	user.GET("/", s.handlers.GetUserInfoByID)
-	user.PATCH("/", s.handlers.UpdateUserInfo)
+	{
+		user.GET("/", s.handlers.GetUserProfileByID)
+		user.PATCH("/", s.handlers.UpdateUserProfileByID)
+	}
+	users.GET("/search", s.handlers.SearchUsername)
 }
