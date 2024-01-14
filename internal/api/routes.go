@@ -20,7 +20,7 @@ func SetupRoutes(r *gin.Engine, s *APIServer) {
 	user := users.Group("/id/:userID")
 	{
 		user.GET("/", s.handlers.GetUserProfileByID)
-		user.PATCH("/", s.handlers.UpdateUserProfileByID)
+		user.PATCH("/", s.handlers.JWTAuth, s.handlers.UpdateUserProfileByID)
 	}
 	users.GET("/search", s.handlers.SearchUsername)
 }

@@ -35,8 +35,10 @@ func (s *APIServices) Login(usernameOrEmail string, password string) (int64, str
 		return 0, "", newErrInvalidCredentials("invalid password")
 	}
 
-	// TODO: generate token
-	token := ""
+	token, err := utils.GenerateJWT(userID)
+	if err != nil {
+		return 0, "", newErrInternal(err)
+	}
 
 	return userID, token, nil
 }
@@ -60,8 +62,10 @@ func (s *APIServices) Signup(email string, username string, password string) (in
 		return 0, "", newErrInternal(err)
 	}
 
-	// TODO: generate token
-	token := ""
+	token, err := utils.GenerateJWT(userID)
+	if err != nil {
+		return 0, "", newErrInternal(err)
+	}
 
 	return userID, token, nil
 }
