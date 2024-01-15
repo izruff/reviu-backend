@@ -15,7 +15,7 @@ type updateUserProfileByIDJSON struct {
 type searchJSON struct {
 }
 
-func (s *APIHandlers) GetUserProfileByID(c *gin.Context) {
+func (s *APIHandlers) GetUserProfile(c *gin.Context) {
 	userID, parseErr := strconv.ParseInt(c.Param("userID"), 10, 64)
 	if parseErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -42,7 +42,7 @@ func (s *APIHandlers) GetUserProfileByID(c *gin.Context) {
 	})
 }
 
-func (s *APIHandlers) UpdateUserProfileByID(c *gin.Context) {
+func (s *APIHandlers) UpdateUserProfile(c *gin.Context) {
 	userID, parseErr := strconv.ParseInt(c.Param("userID"), 10, 64)
 	if parseErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -70,6 +70,30 @@ func (s *APIHandlers) UpdateUserProfileByID(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
-func (s *APIHandlers) SearchUsername(c *gin.Context) {
+func (s *APIHandlers) DeleteUser(c *gin.Context) {
+
+}
+
+func (s *APIHandlers) GetUserPosts(c *gin.Context) {
+
+}
+
+func (s *APIHandlers) FollowUser(c *gin.Context) {
+
+}
+
+func (s *APIHandlers) GetFollowers(c *gin.Context) {
+
+}
+
+func (s *APIHandlers) GetUserBookmarkedPosts(c *gin.Context) {
+
+}
+
+func (s *APIHandlers) BanUser(c *gin.Context) {
+
+}
+
+func (s *APIHandlers) SearchUsernames(c *gin.Context) {
 
 }
