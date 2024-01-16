@@ -2,6 +2,7 @@ package services
 
 import (
 	"regexp"
+	"time"
 
 	"github.com/izruff/reviu-backend/internal/models"
 	"github.com/izruff/reviu-backend/internal/utils"
@@ -88,5 +89,34 @@ func (s *APIServices) UpdateUserByID(id int64, updatedUser *models.User) *SvcErr
 		return newErrInternal(err)
 	}
 
+	return nil
+}
+
+func (s *APIServices) DeleteUserByID(id int64) *SvcError {
+	if err := s.queries.DeleteUserByID(id); err != nil {
+		// TODO: error handling when user does not exist
+		return newErrInternal(err)
+	}
+
+	return nil
+}
+
+func (s *APIServices) FollowUserByID(followerID int64, followingID int64) *SvcError {
+	return nil
+}
+
+func (s *APIServices) BanUserByID(id int64, moderatorID int64, reason string, startTime time.Time, endTime time.Time) *SvcError {
+	return nil
+}
+
+func (s *APIServices) GetFollowingList(id int64) *SvcError {
+	return nil
+}
+
+func (s *APIServices) GetFollowersList(id int64) *SvcError {
+	return nil
+}
+
+func (s *APIServices) SearchUsernames(query string, options map[string]interface{}) *SvcError {
 	return nil
 }
