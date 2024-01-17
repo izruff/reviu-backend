@@ -5,8 +5,14 @@ import (
 	"gopkg.in/guregu/null.v3"
 )
 
-func (s *APIServices) CreatePost(id int64) (int64, *SvcError) {
-	newPost := &models.Post{}
+func (s *APIServices) CreatePost(id int64, title string, content string, authorID int64, topicID int64) (int64, *SvcError) {
+	newPost := &models.Post{
+		ID:       null.NewInt(id, true),
+		Title:    null.NewString(title, true),
+		Content:  null.NewString(content, true),
+		AuthorID: null.NewInt(authorID, true),
+		TopicID:  null.NewInt(topicID, true),
+	}
 
 	postID, err := s.queries.CreatePost(newPost)
 	if err != nil {

@@ -34,7 +34,7 @@ func (s *APIHandlers) GetUserProfile(c *gin.Context) {
 
 	// TODO: add more info such as follow count
 	c.JSON(http.StatusOK, gin.H{
-		"id":        userID,
+		"userId":    userID,
 		"username":  user.Username.String,
 		"nickname":  user.Nickname.String,
 		"about":     user.About.String,
