@@ -82,6 +82,7 @@ func (s *APIServices) GetUserByID(id int64) (*models.User, *SvcError) {
 }
 
 func (s *APIServices) UpdateUserByID(id int64, updatedUser *models.User) *SvcError {
+	// TODO: error handling when there are no changes
 	updatedUser.ID.Int64 = id
 	updatedUser.ID.Valid = true
 	if err := s.queries.UpdateUserByID(updatedUser); err != nil {
@@ -102,21 +103,59 @@ func (s *APIServices) DeleteUserByID(id int64) *SvcError {
 }
 
 func (s *APIServices) FollowUserByID(followerID int64, followingID int64) *SvcError {
+	newRelation := &models.Relation{
+		FollowerID:  null.NewInt(followerID, true),
+		FollowingID: null.NewInt(followingID, true),
+	}
+
+	if err := s.queries.CreateRelation(newRelation); err != nil {
+		// TODO: error handling when user does not exist
+		return newErrInternal(err)
+	}
+
 	return nil
 }
 
 func (s *APIServices) BanUserByID(id int64, moderatorID int64, reason string, startTime time.Time, endTime time.Time) *SvcError {
-	return nil
+	return nil // TODO
 }
 
-func (s *APIServices) GetFollowingList(id int64) *SvcError {
-	return nil
+func (s *APIServices) GetFollowersList(id int64) ([]*models.User, *SvcError) {
+	followers, err := s.queries.GetFollowersFromUserID(id)
+	if err != nil {
+		return nil, newErrInternal(err)
+	}
+
+	var users []*models.User
+	for _, relation := range followers {
+		user, err := s.GetUserByID(relation.FollowerID.Int64)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
 }
 
-func (s *APIServices) GetFollowersList(id int64) *SvcError {
-	return nil
+func (s *APIServices) GetFollowingsList(id int64) ([]*models.User, *SvcError) {
+	followings, err := s.queries.GetFollowingsFromUserID(id)
+	if err != nil {
+		return nil, newErrInternal(err)
+	}
+
+	var users []*models.User
+	for _, relation := range followings {
+		user, err := s.GetUserByID(relation.FollowingID.Int64)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
 }
 
 func (s *APIServices) SearchUsernames(query string, options map[string]interface{}) *SvcError {
-	return nil
+	return nil // TODO
 }
