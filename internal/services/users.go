@@ -93,15 +93,6 @@ func (s *APIServices) UpdateUserByID(id int64, updatedUser *models.User) *SvcErr
 	return nil
 }
 
-func (s *APIServices) DeleteUserByID(id int64) *SvcError {
-	if err := s.queries.DeleteUserByID(id); err != nil {
-		// TODO: error handling when user does not exist
-		return newErrInternal(err)
-	}
-
-	return nil
-}
-
 func (s *APIServices) FollowUserByID(followerID int64, followingID int64) *SvcError {
 	newRelation := &models.Relation{
 		FollowerID:  null.NewInt(followerID, true),

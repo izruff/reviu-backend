@@ -3,82 +3,81 @@ package api
 import "github.com/gin-gonic/gin"
 
 func SetupRoutes(r *gin.Engine, s *APIServer) {
-	// For testing
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	// These routes are classified into four categories:
+	//   account: requests related to user authentication,
+	//   public: requests which can be made by any visitor,
+	//   authorized: requests only available for registered users, and
+	//   moderator: requests for moderation purposes.
 
-	// Routes for user authentication
-	auth := r.Group("/auth")
-	auth.POST("/login", s.handlers.Login)
-	auth.POST("/signup", s.handlers.Signup)
-
-	// Routes for interacting with the user model
-	users := r.Group("/users")
-	user := users.Group("/id/:userID")
+	account := r.Group("/account")
 	{
-		user.GET("/", s.handlers.GetUserProfile)
-		withAuth := user.Group("/", s.handlers.JWTAuth)
-		{
-			withAuth.PATCH("/", s.handlers.UpdateUserProfile)
-			withAuth.DELETE("/", s.handlers.DeleteUser)
+		account.POST("/login", s.handlers.Login)
+		account.POST("/signup", s.handlers.Signup)
 
-			withAuth.GET("/post-list", s.handlers.GetUserPosts)
-			withAuth.POST("/follow", s.handlers.FollowUser)
-			withAuth.GET("/follow-list", s.handlers.GetFollowers)
-			withAuth.GET("/bookmark-list", s.handlers.GetUserBookmarkedPosts)
-		}
-		modOnly := user.Group("/", s.handlers.JWTAuth) // TODO: replace with middleware that also checks mod role
-		{
-			modOnly.POST("/ban", s.handlers.BanUser)
-		}
+		// For security purposes, the actions below require a full login
+		// (email/username and password input), not a JWT token.
+		// TODO
 	}
-	users.GET("/search", s.handlers.SearchUsernames)
 
-	// Routes for interacting with the post and comment model
-	posts := r.Group("/posts")
-	post := posts.Group("/id/:postID")
+	public := r.Group("/public")
 	{
-		post.GET("/", s.handlers.GetPostOnly)
-		post.GET("/all", s.handlers.GetPostWithChildren)
-		withAuth := post.Group("/", s.handlers.JWTAuth)
+		users := public.Group("/users")
+		users.GET("/", s.handlers.SearchUsers)
+		user := users.Group("/id/:userID")
 		{
-			withAuth.POST("/comment", s.handlers.CommentOnPost)
-			withAuth.PATCH("/edit", s.handlers.EditPost)
-			withAuth.POST("/vote", s.handlers.VotePost)
-			withAuth.POST("/bookmark", s.handlers.BookmarkPost)
-		}
-		modOnly := post.Group("/", s.handlers.JWTAuth) // TODO: replace with middleware that also checks mod role
-		{
-			modOnly.PATCH("/delete", s.handlers.DeletePost)
+			user.GET("/", s.handlers.GetUserProfile)
+			user.GET("/followers", s.handlers.GetUserFollowers)
+			user.GET("/followings", s.handlers.GetUserFollowings)
 		}
 
-		comment := post.Group("/comment/:commentID")
-		{
-			comment.GET("/", s.handlers.GetCommentOnly)
-			comment.GET("/all", s.handlers.GetCommentWithChildren)
-			withAuth := comment.Group("/", s.handlers.JWTAuth)
-			{
-				withAuth.POST("/reply", s.handlers.ReplyToComment)
-				withAuth.PATCH("/edit", s.handlers.EditComment)
-			}
-			modOnly := comment.Group("/", s.handlers.JWTAuth) // TODO: replace with middleware that also checks mod role
-			{
-				modOnly.PATCH("/delete", s.handlers.DeleteComment)
-			}
-		}
+		posts := public.Group("/posts")
+		posts.GET("/", s.handlers.SearchPosts)
+		posts.GET("/id/:postID", s.handlers.GetPost)
+
+		comments := public.Group("/posts/id/:postID/comments")
+		comments.GET("/", s.handlers.SearchCommentsInPost)
+		comments.GET("/id/:commentID", s.handlers.GetComment)
+
+		topics := public.Group("/topics")
+		topics.GET("/", s.handlers.SearchTopics)
+		topics.GET("/id/:topicID", s.handlers.GetTopic)
+
+		tags := public.Group("/tags")
+		tags.GET("/", s.handlers.SearchTags)
 	}
-	posts.POST("/create", s.handlers.JWTAuth, s.handlers.CreatePost)
-	posts.GET("/search", s.handlers.SearchPosts)
 
-	// Routes for interacting with the topic model
-	topics := r.Group("/topics")
-	topic := topics.Group("/id/:topicID")
+	authorized := r.Group("/authorized", s.handlers.JWTAuth)
 	{
-		topic.GET("/", s.handlers.GetTopicContents)
+		users := authorized.Group("/users")
+		users.PATCH("/me", s.handlers.UpdateUserProfile)
+		users.GET("/me/private", s.handlers.GetUserPrivates)
+		users.GET("/me/subscriptions", s.handlers.GetUserSubscriptions)
+		users.GET("/me/bookmarks", s.handlers.GetUserBookmarks)
+		users.POST("/follow", s.handlers.FollowUser)
+		users.DELETE("/unfollow", s.handlers.UnfollowUser)
+
+		posts := authorized.Group("/posts")
+		posts.POST("/create", s.handlers.CreatePost)
+		post := posts.Group("/id/:postID")
+		{
+			post.PATCH("/edit", s.handlers.EditPost)
+			post.POST("/comment", s.handlers.CreateCommentOnPost)
+			post.POST("/vote", s.handlers.VotePost)
+			post.POST("/bookmark", s.handlers.BookmarkPost)
+
+			comment := post.Group("/comments/id/:commentID")
+			comment.POST("/reply", s.handlers.ReplyToComment)
+			comment.PATCH("/edit", s.handlers.EditComment)
+		}
+
+		topics := authorized.Group("/topics")
+		topics.POST("/create", s.handlers.CreateTopic)
 	}
-	topics.POST("/create", s.handlers.JWTAuth, s.handlers.CreateTopic)
-	topics.GET("/search", s.handlers.SearchTopics)
+
+	moderator := r.Group("/moderator")
+	{
+		moderator.POST("/users/ban", s.handlers.BanUser)
+		moderator.PATCH("/posts/delete", s.handlers.MarkPostAsDeleted)
+		moderator.PATCH("/comments/delete", s.handlers.MarkCommentAsDeleted)
+	}
 }
