@@ -38,8 +38,12 @@ func (q *PostgresQueries) CountVotesFromPostID(postID int64) (int64, int64, erro
 }
 
 func (q *PostgresQueries) UpdateVote(up bool, postID int64, userID int64) error {
-	updatedVote := &models.Vote{Up: null.NewBool(up, true)}
-	if err := q.updateWhere("votes", true, []string{"up"}, updatedVote, "post_id=$1 AND user_id=$2", postID, userID); err != nil {
+	updatedVote := &models.Vote{
+		Up:     null.NewBool(up, true),
+		PostID: null.NewInt(postID, true),
+		UserID: null.NewInt(userID, true),
+	}
+	if err := q.updateByPK("votes", []string{"up"}, []string{"post_id", "user_id"}, updatedVote); err != nil {
 		return err // TODO: error handling when vote does not exist
 	}
 

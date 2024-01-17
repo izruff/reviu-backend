@@ -43,6 +43,10 @@ func (q *PostgresQueries) GetUserIDByUsername(username string) (int64, error) {
 	return userID, nil
 }
 
+func (q *PostgresQueries) GetUsersWithOptions(options strToAny) ([]*models.User, error) {
+	return nil, nil // TODO
+}
+
 func (q *PostgresQueries) UpdateUserByID(updatedUser *models.User) error {
 	if !updatedUser.ID.Valid {
 		return errors.New("ID not provided")

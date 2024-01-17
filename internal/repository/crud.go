@@ -68,12 +68,16 @@ func (q *PostgresQueries) updateByID(table string, columns []string, modelInstan
 	return nil
 }
 
-func (q *PostgresQueries) updateWhere(table string, mustUpdateOne bool, columns []string, modelInstance interface{}, whereQuery string, whereArgs ...interface{}) error {
+func (q *PostgresQueries) updateByPK(table string, columns []string, pkColumns []string, modelInstance interface{}) error {
 	var setSlice []string
 	for _, col := range columns {
 		setSlice = append(setSlice, col+"=:"+col)
 	}
-	query := "UPDATE " + table + " SET " + strings.Join(setSlice, ",") + " WHERE " // TODO
+	var whereSlice []string
+	for _, col := range pkColumns {
+		whereSlice = append(setSlice, col+"=:"+col)
+	}
+	query := "UPDATE " + table + " SET " + strings.Join(setSlice, ",") + " WHERE " + strings.Join(whereSlice, " AND ")
 
 	result, err := q.db.NamedExec(query, modelInstance)
 	if err != nil {
@@ -86,9 +90,6 @@ func (q *PostgresQueries) updateWhere(table string, mustUpdateOne bool, columns 
 	}
 	if rowsAffected == 0 {
 		return errors.New("no such row") // TODO: error handling
-	}
-	if mustUpdateOne && (rowsAffected > 1) {
-		return errors.New("more than one instances") // TODO: this should be before actually updating them, alternatively do rollback?
 	}
 
 	return nil
