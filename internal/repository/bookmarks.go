@@ -12,13 +12,27 @@ func (q *PostgresQueries) CreateBookmark(newBookmark *models.Bookmark) error {
 }
 
 func (q *PostgresQueries) GetBookmarksFromUserID(userID int64) ([]*models.Bookmark, error) {
-	return nil, nil // TODO
+	var bookmarks []*models.Bookmark
+	if err := q.selectAll(bookmarks, "bookmarks", "post_id", "user_id=$1", userID); err != nil {
+		return nil, err
+	}
+
+	return bookmarks, nil
 }
 
 func (q *PostgresQueries) CountBookmarksFromUserID(userID int64) (int64, error) {
-	return 0, nil // TODO
+	count, err := q.count("bookmarks", "post_id", "user_id=$1", userID)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
 
 func (q *PostgresQueries) DeleteBookmark(postID int64, userID int64) error {
-	return nil // TODO
+	if err := q.deleteWhere("bookmarks", true, "post_id=$1 AND user_id=$2", postID, userID); err != nil {
+		return err // TODO: error handling when bookmark does not exist
+	}
+
+	return nil
 }

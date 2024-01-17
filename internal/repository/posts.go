@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"time"
 
 	"github.com/izruff/reviu-backend/internal/models"
@@ -32,6 +33,10 @@ func (q *PostgresQueries) GetPostsWithOptions(options interface{}) ([]*models.Po
 }
 
 func (q *PostgresQueries) UpdatePostByID(updatedPost *models.Post) error {
+	if !updatedPost.ID.Valid {
+		return errors.New("ID not provided")
+	}
+
 	var columns []string
 	if updatedPost.Title.Valid {
 		columns = append(columns, "title")

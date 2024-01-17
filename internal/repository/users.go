@@ -1,6 +1,10 @@
 package repository
 
-import "github.com/izruff/reviu-backend/internal/models"
+import (
+	"errors"
+
+	"github.com/izruff/reviu-backend/internal/models"
+)
 
 func (q *PostgresQueries) CreateUser(newUser *models.User) (int64, error) {
 	userID, err := q.create("users", []string{"email", "password_hash", "mod_role", "username"}, true, newUser)
@@ -40,6 +44,10 @@ func (q *PostgresQueries) GetUserIDByUsername(username string) (int64, error) {
 }
 
 func (q *PostgresQueries) UpdateUserByID(updatedUser *models.User) error {
+	if !updatedUser.ID.Valid {
+		return errors.New("ID not provided")
+	}
+
 	var columns []string
 	if updatedUser.Email.Valid {
 		columns = append(columns, "email")

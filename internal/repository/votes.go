@@ -1,6 +1,9 @@
 package repository
 
-import "github.com/izruff/reviu-backend/internal/models"
+import (
+	"github.com/izruff/reviu-backend/internal/models"
+	"gopkg.in/guregu/null.v3"
+)
 
 func (q *PostgresQueries) CreateVote(newVote *models.Vote) error {
 	// TODO: error handling when form is incomplete or already exists
@@ -12,17 +15,41 @@ func (q *PostgresQueries) CreateVote(newVote *models.Vote) error {
 }
 
 func (q *PostgresQueries) GetVotesFromPostID(postID int64) ([]*models.Vote, error) {
-	return nil, nil // TODO
+	var votes []*models.Vote
+	if err := q.selectAll(votes, "votes", "post_id", "WHERE post_id=:post_id", postID); err != nil {
+		return nil, err
+	}
+
+	return votes, nil
 }
 
-func (q *PostgresQueries) CountVotesFromPostID(postID int64) (int64, error) {
-	return 0, nil // TODO
+func (q *PostgresQueries) CountVotesFromPostID(postID int64) (int64, int64, error) {
+	upCount, err := q.count("votes", "up", "up=t AND post_id=$1", postID)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	downCount, err := q.count("votes", "up", "up=f AND post_id=$1", postID)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return upCount, downCount, nil
 }
 
-func (q *PostgresQueries) UpdateVote(postID int64, userID int64) error {
-	return nil // TODO
+func (q *PostgresQueries) UpdateVote(up bool, postID int64, userID int64) error {
+	updatedVote := &models.Vote{Up: null.NewBool(up, true)}
+	if err := q.updateWhere("votes", true, []string{"up"}, updatedVote, "post_id=$1 AND user_id=$2", postID, userID); err != nil {
+		return err // TODO: error handling when vote does not exist
+	}
+
+	return nil
 }
 
 func (q *PostgresQueries) DeleteVote(postID int64, userID int64) error {
-	return nil // TODO
+	if err := q.deleteWhere("votes", true, "post_id=$1 AND user_id=$2", postID, userID); err != nil {
+		return err // TODO: error handling when vote does not exist
+	}
+
+	return nil
 }

@@ -21,7 +21,7 @@ func (q *PostgresQueries) GetTagByID(id int64) (*models.Tag, error) {
 	return tag, nil
 }
 
-// TODO: implement filters and preferences (this includes getting all tags in a post)
+// TODO: implement filters and preferences
 func (q *PostgresQueries) GetTagsWithOptions(options strToAny) ([]*models.Tag, error) {
 	return nil, nil
 }

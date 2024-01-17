@@ -17,9 +17,9 @@ func (q *PostgresQueries) GetTagsFromPostID(postID int64) ([]*models.Tag, error)
 
 // TODO: might implement a function which returns a (Postgres) view of the tags in a post/vice versa
 
-func (q *PostgresQueries) DeleteTagFromPostWithID(postID int64, tagID int64) error {
-	if err := q.deleteByPK("tagged_posts", strToAny{"post_id": postID, "tag_id": tagID}); err != nil {
-		return err // TODO: error handling when user does not exist
+func (q *PostgresQueries) DeleteTagFromPost(postID int64, tagID int64) error {
+	if err := q.deleteWhere("tagged_posts", true, "post_id=$1 AND tag_id=$2", postID, tagID); err != nil {
+		return err // TODO: error handling when tagged post does not exist
 	}
 
 	return nil
