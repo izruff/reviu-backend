@@ -43,8 +43,39 @@ func (q *PostgresQueries) GetUserIDByUsername(username string) (int64, error) {
 	return userID, nil
 }
 
-func (q *PostgresQueries) GetUsersWithOptions(options strToAny) ([]*models.User, error) {
-	return nil, nil // TODO
+func (q *PostgresQueries) GetUsersWithOptions(options *models.SearchUsersOptions) ([]*models.User, error) {
+	// TODO: this needs the pg_tgrm extension for Postgres
+	var whereQuery, orderBy string
+	var whereArgs []interface{}
+
+	if options.Query != "" {
+		if options.ExactMatch == "true" {
+			whereQuery = "username ILIKE $1"
+			whereArgs = append(whereArgs, "%"+options.Query+"%")
+		} else {
+			whereQuery = "username % $1"
+			whereArgs = append(whereArgs, options.Query)
+		}
+	}
+
+	switch options.SortBy {
+	case "popularity":
+		orderBy = "" // TODO
+	case "similarity":
+		if options.Query != "" {
+			orderBy = "username <-> $2"
+			whereArgs = append(whereArgs, options.Query)
+		}
+	default:
+		orderBy = "" // TODO
+	}
+
+	var users []*models.User
+	if err := q.selectAll(users, "users", "*", whereQuery, orderBy, whereArgs...); err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
 
 func (q *PostgresQueries) UpdateUserByID(updatedUser *models.User) error {

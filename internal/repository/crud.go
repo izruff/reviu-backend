@@ -5,8 +5,6 @@ import (
 	"strings"
 )
 
-type strToAny map[string]interface{}
-
 func (q *PostgresQueries) create(table string, columns []string, returningID bool, modelInstance interface{}) (int64, error) {
 	query := "INSERT INTO " + table + " (" + strings.Join(columns, ",") + ") VALUES (:" + strings.Join(columns, ",:") + ")"
 	if returningID {
@@ -38,8 +36,16 @@ func (q *PostgresQueries) create(table string, columns []string, returningID boo
 	return 0, nil
 }
 
-func (q *PostgresQueries) selectAll(dest interface{}, table string, column string, whereQuery string, whereArgs ...interface{}) error {
-	if err := q.db.Select(dest, "SELECT "+column+" FROM "+table+" WHERE "+whereQuery, whereArgs...); err != nil {
+func (q *PostgresQueries) selectAll(dest interface{}, table string, column string, whereQuery string, orderBy string, whereArgs ...interface{}) error {
+	query := "SELECT " + column + " FROM " + table
+	if whereQuery != "" {
+		query += " WHERE " + whereQuery
+	}
+	if orderBy != "" {
+		query += " ORDER BY " + orderBy
+	}
+
+	if err := q.db.Select(dest, query, whereArgs...); err != nil {
 		return err
 	}
 
@@ -47,7 +53,12 @@ func (q *PostgresQueries) selectAll(dest interface{}, table string, column strin
 }
 
 func (q *PostgresQueries) selectOne(dest interface{}, table string, column string, whereQuery string, whereArgs ...interface{}) error {
-	if err := q.db.Get(dest, "SELECT "+column+" FROM "+table+" WHERE "+whereQuery, whereArgs...); err != nil {
+	query := "SELECT " + column + " FROM " + table
+	if whereQuery != "" {
+		query += " WHERE " + whereQuery
+	}
+
+	if err := q.db.Get(dest, query, whereArgs...); err != nil {
 		return err
 	}
 

@@ -1,6 +1,8 @@
 package repository
 
-import "github.com/izruff/reviu-backend/internal/models"
+import (
+	"github.com/izruff/reviu-backend/internal/models"
+)
 
 func (q *PostgresQueries) CreateTopic(newTopic *models.Topic) (int64, error) {
 	topicID, err := q.create("topics", []string{"topic", "hub"}, true, newTopic)
@@ -22,6 +24,10 @@ func (q *PostgresQueries) GetTopicByID(id int64) (*models.Topic, error) {
 }
 
 // TODO: implement filters and preferences
-func (q *PostgresQueries) GetTopicsWithOptions(options strToAny) ([]*models.Topic, error) {
+func (q *PostgresQueries) GetTopicsWithOptions(options interface{}) ([]*models.Topic, error) {
 	return nil, nil
+}
+
+func (q *PostgresQueries) UpdateTopicByID(id int64, description string) error {
+	return nil // TODO: migrate the schema first
 }

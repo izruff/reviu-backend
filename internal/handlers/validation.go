@@ -1,9 +1,16 @@
 package handlers
 
-import "github.com/gin-gonic/gin"
+// For account handlers
 
-func newResponseErrBindJSON(err error) *gin.H {
-	return &gin.H{
-		"error": err.Error(),
-	}
+type loginJSON struct {
+	UsernameOrEmail string `json:"usernameOrEmail" binding:"required"`
+	Password        string `json:"password" binding:"required"`
 }
+
+type signupJSON struct {
+	Email    string `json:"email" binding:"required"`
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+// For public handlers

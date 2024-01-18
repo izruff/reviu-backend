@@ -22,6 +22,6 @@ func (q *PostgresQueries) GetTagByID(id int64) (*models.Tag, error) {
 }
 
 // TODO: implement filters and preferences
-func (q *PostgresQueries) GetTagsWithOptions(options strToAny) ([]*models.Tag, error) {
+func (q *PostgresQueries) GetTagsWithOptions(options interface{}) ([]*models.Tag, error) {
 	return nil, nil
 }

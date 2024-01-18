@@ -28,7 +28,7 @@ func (q *PostgresQueries) GetPostByID(id int64) (*models.Post, error) {
 }
 
 // TODO: implement filters and preferences
-func (q *PostgresQueries) GetPostsWithOptions(options interface{}) ([]*models.Post, error) {
+func (q *PostgresQueries) GetPostsWithOptions(options *models.SearchPostsOptions) ([]*models.Post, error) {
 	return nil, nil
 }
 

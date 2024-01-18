@@ -147,6 +147,11 @@ func (s *APIServices) GetFollowingsList(id int64) ([]*models.User, *SvcError) {
 	return users, nil
 }
 
-func (s *APIServices) SearchUsernames(query string, options map[string]interface{}) *SvcError {
-	return nil // TODO
+func (s *APIServices) SearchUsers(options *models.SearchUsersOptions) ([]*models.User, *SvcError) {
+	users, err := s.queries.GetUsersWithOptions(options)
+	if err != nil {
+		return nil, newErrInternal(err) // TODO: error handling when there are incorrect options
+	}
+
+	return users, nil // TODO
 }

@@ -5,9 +5,8 @@ import (
 	"gopkg.in/guregu/null.v3"
 )
 
-func (s *APIServices) CreatePost(id int64, title string, content string, authorID int64, topicID int64) (int64, *SvcError) {
+func (s *APIServices) CreatePost(title string, content string, authorID int64, topicID int64) (int64, *SvcError) {
 	newPost := &models.Post{
-		ID:       null.NewInt(id, true),
 		Title:    null.NewString(title, true),
 		Content:  null.NewString(content, true),
 		AuthorID: null.NewInt(authorID, true),
@@ -51,6 +50,15 @@ func (s *APIServices) DeletePostByID(id int64, reasonForDeletion string, moderat
 	}
 
 	return nil
+}
+
+func (s *APIServices) SearchPosts(options *models.SearchPostsOptions) ([]*models.Post, *SvcError) {
+	users, err := s.queries.GetPostsWithOptions(options)
+	if err != nil {
+		return nil, newErrInternal(err) // TODO: error handling when there are incorrect options
+	}
+
+	return users, nil // TODO
 }
 
 func (s *APIServices) GetPostsByAuthorID(authorID int64) *SvcError {
