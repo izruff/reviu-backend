@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/izruff/reviu-backend/internal/api"
-	"github.com/izruff/reviu-backend/internal/database"
+	database "github.com/izruff/reviu-backend/internal/database/postgres"
 	"github.com/joho/godotenv"
 )
 

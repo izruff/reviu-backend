@@ -12,7 +12,7 @@ func (q *PostgresQueries) CreateTaggedPost(newTaggedPost *models.TaggedPost) err
 }
 
 func (q *PostgresQueries) GetTagsFromPostID(postID int64) ([]*models.Tag, error) {
-	return nil, nil // TODO
+	return nil, nil // TODO: maybe just merge with GetTagsWithOptions
 }
 
 // TODO: might implement a function which returns a (Postgres) view of the tags in a post/vice versa

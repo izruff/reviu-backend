@@ -93,6 +93,19 @@ func (s *APIServices) UpdateUserByID(id int64, updatedUser *models.User) *SvcErr
 	return nil
 }
 
+func (s *APIServices) BanUserByID(id int64, moderatorID int64, reason string, startTime time.Time, endTime time.Time) *SvcError {
+	return nil // TODO
+}
+
+func (s *APIServices) SearchUsers(options *models.SearchUsersOptions) ([]*models.User, *SvcError) {
+	users, err := s.queries.GetUsersWithOptions(options)
+	if err != nil {
+		return nil, newErrInternal(err) // TODO: error handling when there are incorrect options
+	}
+
+	return users, nil // TODO
+}
+
 func (s *APIServices) FollowUserByID(followerID int64, followingID int64) *SvcError {
 	newRelation := &models.Relation{
 		FollowerID:  null.NewInt(followerID, true),
@@ -107,14 +120,19 @@ func (s *APIServices) FollowUserByID(followerID int64, followingID int64) *SvcEr
 	return nil
 }
 
-func (s *APIServices) BanUserByID(id int64, moderatorID int64, reason string, startTime time.Time, endTime time.Time) *SvcError {
-	return nil // TODO
+func (s *APIServices) UnfollowUserByID(followerID int64, followingID int64) *SvcError {
+	if err := s.queries.DeleteRelation(followerID, followingID); err != nil {
+		// TODO: error handling when relation does not exist
+		return newErrInternal(err)
+	}
+
+	return nil
 }
 
-func (s *APIServices) GetFollowersList(id int64) ([]*models.User, *SvcError) {
+func (s *APIServices) GetUserFollowers(id int64) ([]*models.User, *SvcError) {
 	followers, err := s.queries.GetFollowersFromUserID(id)
 	if err != nil {
-		return nil, newErrInternal(err)
+		return nil, newErrInternal(err) // TODO: error handling when user does not exist
 	}
 
 	var users []*models.User
@@ -129,10 +147,10 @@ func (s *APIServices) GetFollowersList(id int64) ([]*models.User, *SvcError) {
 	return users, nil
 }
 
-func (s *APIServices) GetFollowingsList(id int64) ([]*models.User, *SvcError) {
+func (s *APIServices) GetUserFollowings(id int64) ([]*models.User, *SvcError) {
 	followings, err := s.queries.GetFollowingsFromUserID(id)
 	if err != nil {
-		return nil, newErrInternal(err)
+		return nil, newErrInternal(err) // TODO: error handling when user does not exist
 	}
 
 	var users []*models.User
@@ -147,11 +165,20 @@ func (s *APIServices) GetFollowingsList(id int64) ([]*models.User, *SvcError) {
 	return users, nil
 }
 
-func (s *APIServices) SearchUsers(options *models.SearchUsersOptions) ([]*models.User, *SvcError) {
-	users, err := s.queries.GetUsersWithOptions(options)
+func (s *APIServices) GetUserSubscriptions(id int64) ([]*models.Subscription, *SvcError) {
+	subscriptions, err := s.queries.GetSubscribedTopicsFromUserID(id)
 	if err != nil {
-		return nil, newErrInternal(err) // TODO: error handling when there are incorrect options
+		return nil, newErrInternal(err) // TODO: error handling when user does not exist
 	}
 
-	return users, nil // TODO
+	return subscriptions, nil
+}
+
+func (s *APIServices) GetUserBookmarks(id int64) ([]*models.Bookmark, *SvcError) {
+	bookmarks, err := s.queries.GetBookmarksFromUserID(id)
+	if err != nil {
+		return nil, newErrInternal(err) // TODO: error handling when user does not exist
+	}
+
+	return bookmarks, nil
 }

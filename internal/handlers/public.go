@@ -72,7 +72,7 @@ func (s *APIHandlers) GetUserFollowers(c *gin.Context) {
 		return
 	}
 
-	users, err := s.services.GetFollowersList(userID)
+	users, err := s.services.GetUserFollowers(userID)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -100,7 +100,7 @@ func (s *APIHandlers) GetUserFollowings(c *gin.Context) {
 		return
 	}
 
-	users, err := s.services.GetFollowingsList(userID)
+	users, err := s.services.GetUserFollowings(userID)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -167,6 +167,7 @@ func (s *APIHandlers) GetPost(c *gin.Context) {
 		return
 	}
 
+	// TODO: add more info such as vote count
 	c.JSON(http.StatusOK, gin.H{
 		"title":     post.Title.String,
 		"content":   post.Content.String,

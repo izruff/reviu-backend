@@ -15,7 +15,7 @@ func (q *PostgresQueries) CreateTag(newTag *models.Tag) (int64, error) {
 func (q *PostgresQueries) GetTagByID(id int64) (*models.Tag, error) {
 	tag := &models.Tag{}
 	if err := q.selectOne(tag, "tags", "*", "id=$1", id); err != nil {
-		return nil, err // TODO: error handling when post does not exist
+		return nil, err // TODO: error handling when tag does not exist
 	}
 
 	return tag, nil

@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS topics (
   id integer primary key generated always as identity,
   topic varchar not null,
   hub hub_enum not null,
+  description varchar,
   created_at timestamptz default current_timestamp,
   unique (topic, hub)
 );

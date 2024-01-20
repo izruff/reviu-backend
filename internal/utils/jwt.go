@@ -12,7 +12,7 @@ import (
 func GenerateJWT(id int64) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": strconv.FormatInt(id, 10),
-		"exp": jwt.NewNumericDate(time.Now().Add(2 * time.Minute)),
+		"exp": jwt.NewNumericDate(time.Now().Add(JWTExpiryMinutes * time.Minute)),
 	})
 
 	secretKey := []byte(os.Getenv("JWT_SECRET_KEY"))
