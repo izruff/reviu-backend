@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS comments (
   content varchar,
   author_id integer references users(id) not null,
   post_id integer references posts(id) not null,
-  parent_comment_id integer references topics(id),
+  parent_comment_id integer references comments(id),
   created_at timestamptz default current_timestamp,
   updated_at timestamptz,
   -- moderator only; null if not deleted
@@ -121,5 +121,8 @@ CREATE TABLE IF NOT EXISTS ban_history (
   primary key (start_time, user_id),
   check (start_time < end_time)
 );
+
+-- install pg_trgm extension
+CREATE EXTENSION pg_trgm;
 
 COMMIT;

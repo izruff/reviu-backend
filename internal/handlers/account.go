@@ -7,8 +7,8 @@ import (
 )
 
 func (h *APIHandlers) Login(c *gin.Context) {
-	var json *loginJSON
-	if err := c.ShouldBindJSON(json); err != nil {
+	var json loginJSON
+	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -30,8 +30,8 @@ func (h *APIHandlers) Login(c *gin.Context) {
 }
 
 func (h *APIHandlers) Signup(c *gin.Context) {
-	var json *signupJSON
-	if err := c.ShouldBindJSON(json); err != nil {
+	var json signupJSON
+	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})

@@ -43,8 +43,7 @@ func (q *PostgresQueries) GetUserIDByUsername(username string) (int64, error) {
 	return userID, nil
 }
 
-func (q *PostgresQueries) GetUsersWithOptions(options *models.SearchUsersOptions) ([]*models.User, error) {
-	// TODO: this needs the pg_tgrm extension for Postgres
+func (q *PostgresQueries) GetUsersWithOptions(options *models.SearchUsersOptions) ([]models.User, error) {
 	var whereQuery, orderBy string
 	var whereArgs []interface{}
 
@@ -70,8 +69,8 @@ func (q *PostgresQueries) GetUsersWithOptions(options *models.SearchUsersOptions
 		orderBy = "" // TODO
 	}
 
-	var users []*models.User
-	if err := q.selectAll(users, "users", "*", whereQuery, orderBy, whereArgs...); err != nil {
+	var users []models.User
+	if err := q.selectAll(&users, "users", "*", whereQuery, orderBy, whereArgs...); err != nil {
 		return nil, err
 	}
 

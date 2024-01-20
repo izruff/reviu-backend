@@ -97,7 +97,7 @@ func (s *APIServices) BanUserByID(id int64, moderatorID int64, reason string, st
 	return nil // TODO
 }
 
-func (s *APIServices) SearchUsers(options *models.SearchUsersOptions) ([]*models.User, *SvcError) {
+func (s *APIServices) SearchUsers(options *models.SearchUsersOptions) ([]models.User, *SvcError) {
 	users, err := s.queries.GetUsersWithOptions(options)
 	if err != nil {
 		return nil, newErrInternal(err) // TODO: error handling when there are incorrect options
@@ -165,7 +165,7 @@ func (s *APIServices) GetUserFollowings(id int64) ([]*models.User, *SvcError) {
 	return users, nil
 }
 
-func (s *APIServices) GetUserSubscriptions(id int64) ([]*models.Subscription, *SvcError) {
+func (s *APIServices) GetUserSubscriptions(id int64) ([]models.Subscription, *SvcError) {
 	subscriptions, err := s.queries.GetSubscribedTopicsFromUserID(id)
 	if err != nil {
 		return nil, newErrInternal(err) // TODO: error handling when user does not exist
@@ -174,7 +174,7 @@ func (s *APIServices) GetUserSubscriptions(id int64) ([]*models.Subscription, *S
 	return subscriptions, nil
 }
 
-func (s *APIServices) GetUserBookmarks(id int64) ([]*models.Bookmark, *SvcError) {
+func (s *APIServices) GetUserBookmarks(id int64) ([]models.Bookmark, *SvcError) {
 	bookmarks, err := s.queries.GetBookmarksFromUserID(id)
 	if err != nil {
 		return nil, newErrInternal(err) // TODO: error handling when user does not exist

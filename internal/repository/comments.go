@@ -44,7 +44,7 @@ func (q *PostgresQueries) UpdateCommentByID(updatedComment *models.Comment) erro
 	// TODO: error handling if nothing is updated
 
 	updatedComment.UpdatedAt = null.NewTime(time.Now(), true)
-	columns = append(columns, "updatedAt")
+	columns = append(columns, "updated_at")
 
 	if err := q.updateByID("comments", columns, updatedComment); err != nil {
 		return err // TODO: error handling when comment does not exist

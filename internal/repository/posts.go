@@ -50,7 +50,7 @@ func (q *PostgresQueries) UpdatePostByID(updatedPost *models.Post) error {
 	// TODO: error handling if nothing is updated
 
 	updatedPost.UpdatedAt = null.NewTime(time.Now(), true)
-	columns = append(columns, "updatedAt")
+	columns = append(columns, "updated_at")
 
 	if err := q.updateByID("posts", columns, updatedPost); err != nil {
 		return err // TODO: error handling when post does not exist
