@@ -9,9 +9,9 @@ type SearchUsersOptions struct {
 	// popularity: sort roughly by user followings and total vote counts.
 	SortBy string `form:"sort-by"`
 
-	// match-left: only shows results which matches the left part of the string and passes the no-match criteria.
-	// match-substring: only shows results which matches some substring and passes the no-match criteria.
-	// no-match (default): shows results which passes a certain threshold of similarness determined by pg_trgm.
+	// left: only shows results which matches the left part of the string and passes the no-match criteria.
+	// substring: only shows results which matches some substring and passes the no-match criteria.
+	// none (default): shows results which passes a certain threshold of similarness determined by pg_trgm.
 	MustMatch string `form:"must-match"`
 }
 
@@ -25,7 +25,7 @@ type SearchPostsOptions struct {
 	SortBy string `form:"sort-by"`
 
 	// title: compare query with only title.
-	// all: compare query with both title and content.
+	// all (default): compare query with both title and content.
 	MatchWith string `form:"match-with"`
 
 	Topics []string `form:"topics"`

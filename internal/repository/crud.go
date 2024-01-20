@@ -36,7 +36,7 @@ func (q *PostgresQueries) create(table string, columns []string, returningID boo
 	return 0, nil
 }
 
-func (q *PostgresQueries) selectAll(dest interface{}, table string, column string, whereQuery string, orderBy string, whereArgs ...interface{}) error {
+func (q *PostgresQueries) selectAll(dest interface{}, table string, column string, whereQuery string, orderBy string, queryArgs ...interface{}) error {
 	query := "SELECT " + column + " FROM " + table
 	if whereQuery != "" {
 		query += " WHERE " + whereQuery
@@ -45,7 +45,7 @@ func (q *PostgresQueries) selectAll(dest interface{}, table string, column strin
 		query += " ORDER BY " + orderBy
 	}
 
-	if err := q.db.Select(dest, query, whereArgs...); err != nil {
+	if err := q.db.Select(dest, query, queryArgs...); err != nil {
 		return err
 	}
 

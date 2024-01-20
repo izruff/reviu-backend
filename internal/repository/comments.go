@@ -2,6 +2,8 @@ package repository
 
 import (
 	"errors"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/izruff/reviu-backend/internal/models"
@@ -27,9 +29,39 @@ func (q *PostgresQueries) GetCommentByID(id int64) (*models.Comment, error) {
 	return comment, nil
 }
 
-// TODO: implement filters and preferences
-func (q *PostgresQueries) GetCommentsWithOptions(options interface{}) ([]*models.Comment, error) {
-	return nil, nil
+func (q *PostgresQueries) GetCommentsWithOptions(options *models.SearchCommentsOptions) ([]models.Comment, error) {
+	var whereQueries []string
+	var orderBy string
+	var queryArgs []interface{}
+
+	whereQueries = append(whereQueries, "post_id=$1")
+	queryArgs = append(queryArgs, options.PostID)
+	argsIndex := 2
+
+	if options.Query != "" {
+		whereQueries = append(whereQueries, "content %>> $"+strconv.Itoa(argsIndex))
+		queryArgs = append(queryArgs, options.Query)
+		argsIndex++
+	}
+
+	if options.SortBy == "similarity" {
+		orderBy = "content <->>> $" + strconv.Itoa(argsIndex)
+		queryArgs = append(queryArgs, options.Query)
+		argsIndex++
+	} else if options.SortBy == "age-asc" || options.SortBy == "" {
+		orderBy = "created_at DESC"
+	} else if options.SortBy == "age-desc" {
+		orderBy = "created_at ASC"
+	} else {
+		return nil, errors.New("unexpected error: invalid option for sort-by")
+	}
+
+	var comments []models.Comment
+	if err := q.selectAll(&comments, "comments", "*", strings.Join(whereQueries, " AND "), orderBy, queryArgs...); err != nil {
+		return nil, err
+	}
+
+	return comments, nil
 }
 
 func (q *PostgresQueries) UpdateCommentByID(updatedComment *models.Comment) error {

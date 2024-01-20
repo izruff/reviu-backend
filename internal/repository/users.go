@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/izruff/reviu-backend/internal/models"
 )
@@ -45,32 +46,41 @@ func (q *PostgresQueries) GetUserIDByUsername(username string) (int64, error) {
 
 func (q *PostgresQueries) GetUsersWithOptions(options *models.SearchUsersOptions) ([]models.User, error) {
 	var whereQuery, orderBy string
-	var whereArgs []interface{}
+	var queryArgs []interface{}
+	argsIndex := 1
 
-	if options.Query != "" {
-		if options.ExactMatch == "true" {
-			whereQuery = "username ILIKE $1"
-			whereArgs = append(whereArgs, "%"+options.Query+"%")
-		} else {
-			whereQuery = "username % $1"
-			whereArgs = append(whereArgs, options.Query)
-		}
+	if options.Query == "" {
+		return nil, errors.New("unexpected error: query is empty") // TODO: this should be allowed for browsing
 	}
 
-	switch options.SortBy {
-	case "popularity":
+	if options.SortBy == "popularity" || options.SortBy == "" {
+		orderBy = "username <-> $" + strconv.Itoa(argsIndex)
+		queryArgs = append(queryArgs, options.Query)
+		argsIndex++
+	} else if options.SortBy == "popularity" {
 		orderBy = "" // TODO
-	case "similarity":
-		if options.Query != "" {
-			orderBy = "username <-> $2"
-			whereArgs = append(whereArgs, options.Query)
-		}
-	default:
-		orderBy = "" // TODO
+	} else {
+		return nil, errors.New("unexpected error: invalid option for sort-by")
+	}
+
+	if options.MustMatch == "left" {
+		whereQuery = "username ILIKE $" + strconv.Itoa(argsIndex)
+		queryArgs = append(queryArgs, options.Query+"%")
+		argsIndex++
+	} else if options.MustMatch == "substring" {
+		whereQuery = "username ILIKE $" + strconv.Itoa(argsIndex)
+		queryArgs = append(queryArgs, "%"+options.Query+"%")
+		argsIndex++
+	} else if options.MustMatch == "none" || options.MustMatch == "" {
+		whereQuery = "username % $" + strconv.Itoa(argsIndex)
+		queryArgs = append(queryArgs, options.Query)
+		argsIndex++
+	} else {
+		return nil, errors.New("unexpected error: invalid option for must-match")
 	}
 
 	var users []models.User
-	if err := q.selectAll(&users, "users", "*", whereQuery, orderBy, whereArgs...); err != nil {
+	if err := q.selectAll(&users, "users", "*", whereQuery, orderBy, queryArgs...); err != nil {
 		return nil, err
 	}
 

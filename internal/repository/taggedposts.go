@@ -11,7 +11,7 @@ func (q *PostgresQueries) CreateTaggedPost(newTaggedPost *models.TaggedPost) err
 	return nil
 }
 
-func (q *PostgresQueries) GetTagsFromPostID(postID int64) ([]*models.Tag, error) {
+func (q *PostgresQueries) GetTagsFromPostID(postID int64) ([]models.Tag, error) {
 	return nil, nil // TODO: maybe just merge with GetTagsWithOptions
 }
 

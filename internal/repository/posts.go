@@ -2,6 +2,8 @@ package repository
 
 import (
 	"errors"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/izruff/reviu-backend/internal/models"
@@ -27,9 +29,56 @@ func (q *PostgresQueries) GetPostByID(id int64) (*models.Post, error) {
 	return post, nil
 }
 
-// TODO: implement filters and preferences
-func (q *PostgresQueries) GetPostsWithOptions(options *models.SearchPostsOptions) ([]*models.Post, error) {
-	return nil, nil
+func (q *PostgresQueries) GetPostsWithOptions(options *models.SearchPostsOptions) ([]models.Post, error) {
+	var whereQueries []string
+	var orderBy string
+	var queryArgs []interface{}
+	argsIndex := 1
+
+	if options.Query == "" {
+		return nil, errors.New("unexpected error: query is empty") // TODO: this should be allowed for browsing or searching recommendations
+	}
+
+	if options.SortBy == "similarity" {
+		if options.MatchWith == "title" {
+			orderBy = "title <->>> $" + strconv.Itoa(argsIndex)
+			queryArgs = append(queryArgs, options.Query)
+			argsIndex++
+		} else {
+			orderBy = "GREATEST(title <->>> $" + strconv.Itoa(argsIndex) + ", content <->>> $" + strconv.Itoa(argsIndex+1) + ")"
+			queryArgs = append(queryArgs, options.Query, options.Query)
+			argsIndex += 2
+		}
+	} else if options.SortBy == "popularity" {
+		orderBy = "" // TODO
+	} else if options.SortBy == "age-asc" || options.SortBy == "" {
+		orderBy = "created_at DESC"
+	} else if options.SortBy == "age-desc" {
+		orderBy = "created_at ASC"
+	} else {
+		return nil, errors.New("unexpected error: invalid option for sort-by")
+	}
+
+	if options.MatchWith == "title" {
+		whereQueries = append(whereQueries, "title %>> $"+strconv.Itoa(argsIndex))
+		queryArgs = append(queryArgs, options.Query)
+		argsIndex++
+	} else if options.MatchWith == "all" || options.MatchWith == "" {
+		whereQueries = append(whereQueries, "(title %>> $"+strconv.Itoa(argsIndex)+" OR content %>> $"+strconv.Itoa(argsIndex+1)+")")
+		queryArgs = append(queryArgs, options.Query, options.Query)
+		argsIndex += 2
+	} else {
+		return nil, errors.New("unexpected error: invalid option for match-with")
+	}
+
+	// TODO: handle topics and tags list
+
+	var posts []models.Post
+	if err := q.selectAll(&posts, "posts", "*", strings.Join(whereQueries, " AND "), orderBy, queryArgs...); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
 }
 
 func (q *PostgresQueries) UpdatePostByID(updatedPost *models.Post) error {

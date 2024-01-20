@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"errors"
+	"strconv"
+
 	"github.com/izruff/reviu-backend/internal/models"
 )
 
@@ -23,9 +26,47 @@ func (q *PostgresQueries) GetTopicByID(id int64) (*models.Topic, error) {
 	return topic, nil
 }
 
-// TODO: implement filters and preferences
-func (q *PostgresQueries) GetTopicsWithOptions(options interface{}) ([]*models.Topic, error) {
-	return nil, nil
+func (q *PostgresQueries) GetTopicsWithOptions(options *models.SearchTopicsOptions) ([]models.Topic, error) {
+	var whereQuery, orderBy string
+	var queryArgs []interface{}
+	argsIndex := 1
+
+	if options.Query == "" {
+		return nil, errors.New("unexpected error: query is empty") // TODO: this should be allowed for browsing
+	}
+
+	if options.SortBy == "similarity" || options.SortBy == "" {
+		orderBy = "topic <-> $" + strconv.Itoa(argsIndex)
+		queryArgs = append(queryArgs, options.Query)
+		argsIndex++
+	} else if options.SortBy == "popularity" {
+		orderBy = "" // TODO
+	} else { // default: similarity
+		return nil, errors.New("unexpected error: invalid option for sort-by")
+	}
+
+	if options.MustMatch == "left" {
+		whereQuery = "topic ILIKE $" + strconv.Itoa(argsIndex)
+		queryArgs = append(queryArgs, options.Query+"%")
+		argsIndex++
+	} else if options.MustMatch == "substring" {
+		whereQuery = "topic ILIKE $" + strconv.Itoa(argsIndex)
+		queryArgs = append(queryArgs, "%"+options.Query+"%")
+		argsIndex++
+	} else if options.MustMatch == "none" || options.MustMatch == "" {
+		whereQuery = "topic % $" + strconv.Itoa(argsIndex)
+		queryArgs = append(queryArgs, options.Query)
+		argsIndex++
+	} else {
+		return nil, errors.New("unexpected error: invalid option for must-match")
+	}
+
+	var topics []models.Topic
+	if err := q.selectAll(&topics, "topics", "*", whereQuery, orderBy, queryArgs...); err != nil {
+		return nil, err
+	}
+
+	return topics, nil
 }
 
 func (q *PostgresQueries) UpdateTopicByID(id int64, description string) error {

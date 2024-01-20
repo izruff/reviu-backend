@@ -129,37 +129,37 @@ func (s *APIServices) UnfollowUserByID(followerID int64, followingID int64) *Svc
 	return nil
 }
 
-func (s *APIServices) GetUserFollowers(id int64) ([]*models.User, *SvcError) {
+func (s *APIServices) GetUserFollowers(id int64) ([]models.User, *SvcError) {
 	followers, err := s.queries.GetFollowersFromUserID(id)
 	if err != nil {
 		return nil, newErrInternal(err) // TODO: error handling when user does not exist
 	}
 
-	var users []*models.User
+	var users []models.User
 	for _, relation := range followers {
 		user, err := s.GetUserByID(relation.FollowerID.Int64)
 		if err != nil {
 			return nil, err
 		}
-		users = append(users, user)
+		users = append(users, *user)
 	}
 
 	return users, nil
 }
 
-func (s *APIServices) GetUserFollowings(id int64) ([]*models.User, *SvcError) {
+func (s *APIServices) GetUserFollowings(id int64) ([]models.User, *SvcError) {
 	followings, err := s.queries.GetFollowingsFromUserID(id)
 	if err != nil {
 		return nil, newErrInternal(err) // TODO: error handling when user does not exist
 	}
 
-	var users []*models.User
+	var users []models.User
 	for _, relation := range followings {
 		user, err := s.GetUserByID(relation.FollowingID.Int64)
 		if err != nil {
 			return nil, err
 		}
-		users = append(users, user)
+		users = append(users, *user)
 	}
 
 	return users, nil

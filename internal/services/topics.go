@@ -38,6 +38,6 @@ func (s *APIServices) UpdateTopicByID(id int64, description string) *SvcError {
 	return nil
 }
 
-func (s *APIServices) SearchTopics(options *models.SearchTopicsOptions) ([]*models.Topic, *SvcError) {
+func (s *APIServices) SearchTopics(options *models.SearchTopicsOptions) ([]models.Topic, *SvcError) {
 	return nil, nil // TODO
 }

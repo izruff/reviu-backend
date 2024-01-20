@@ -78,7 +78,7 @@ func (s *APIServices) VotePost(id int64, userID int64, up bool) *SvcError {
 	return nil // TODO
 }
 
-func (s *APIServices) SearchPosts(options *models.SearchPostsOptions) ([]*models.Post, *SvcError) {
+func (s *APIServices) SearchPosts(options *models.SearchPostsOptions) ([]models.Post, *SvcError) {
 	users, err := s.queries.GetPostsWithOptions(options)
 	if err != nil {
 		return nil, newErrInternal(err) // TODO: error handling when there are incorrect options

@@ -58,6 +58,6 @@ func (s *APIServices) MarkCommentAsDeletedByID(commentID int64, postID int64, re
 	return nil
 }
 
-func (s *APIServices) SearchCommentsInPost(options *models.SearchCommentsOptions) ([]*models.Comment, *SvcError) {
+func (s *APIServices) SearchCommentsInPost(options *models.SearchCommentsOptions) ([]models.Comment, *SvcError) {
 	return nil, nil // TODO
 }
