@@ -103,7 +103,7 @@ func (s *APIServices) SearchUsers(options *models.SearchUsersOptions) ([]models.
 		return nil, newErrInternal(err) // TODO: error handling when there are incorrect options
 	}
 
-	return users, nil // TODO
+	return users, nil
 }
 
 func (s *APIServices) FollowUserByID(followerID int64, followingID int64) *SvcError {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/izruff/reviu-backend/internal/models"
+	"gopkg.in/guregu/null.v3"
 )
 
 func (s *APIHandlers) SearchUsers(c *gin.Context) {
@@ -25,7 +26,7 @@ func (s *APIHandlers) SearchUsers(c *gin.Context) {
 		return
 	}
 
-	var response []gin.H
+	response := []gin.H{}
 	for _, user := range users {
 		response = append(response, gin.H{
 			"userId":   user.ID.Int64,
@@ -46,7 +47,6 @@ func (s *APIHandlers) GetUserProfile(c *gin.Context) {
 	}
 
 	user, err := s.services.GetUserByID(userID)
-	// TODO: have short or long option
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -54,13 +54,27 @@ func (s *APIHandlers) GetUserProfile(c *gin.Context) {
 		return
 	}
 
-	// TODO: add more info such as follow count
-	c.JSON(http.StatusOK, gin.H{
-		"username":  user.Username.String,
-		"nickname":  user.Nickname.String,
-		"about":     user.About.String,
-		"createdAt": user.CreatedAt.Time,
-	})
+	if c.Query("username") == "true" {
+		c.JSON(http.StatusOK, gin.H{
+			"username": user.Username.String,
+		})
+	} else if c.Query("username") == "false" || c.Query("username") == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"username":       user.Username.String,
+			"nickname":       user.Nickname.String,
+			"about":          user.About.String,
+			"createdAt":      user.CreatedAt.Time,
+			"followerCount":  0,
+			"followingCount": 0,
+			"postCount":      0,
+			"rating":         0,
+		})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "unknown query for username",
+		})
+	}
+
 }
 
 func (s *APIHandlers) GetUserFollowers(c *gin.Context) {
@@ -80,7 +94,7 @@ func (s *APIHandlers) GetUserFollowers(c *gin.Context) {
 		return
 	}
 
-	var response []gin.H
+	response := []gin.H{}
 	for _, user := range users {
 		response = append(response, gin.H{
 			"userId":   user.ID.Int64,
@@ -108,7 +122,7 @@ func (s *APIHandlers) GetUserFollowings(c *gin.Context) {
 		return
 	}
 
-	var response []gin.H
+	response := []gin.H{}
 	for _, user := range users {
 		response = append(response, gin.H{
 			"userId":   user.ID.Int64,
@@ -136,7 +150,7 @@ func (s *APIHandlers) SearchPosts(c *gin.Context) {
 		return
 	}
 
-	var response []gin.H
+	response := []gin.H{}
 	for _, post := range posts {
 		response = append(response, gin.H{
 			"postId":    post.ID.Int64,
@@ -177,7 +191,7 @@ func (s *APIHandlers) GetPost(c *gin.Context) {
 	})
 }
 
-func (s *APIHandlers) SearchCommentsInPost(c *gin.Context) {
+func (s *APIHandlers) GetRepliesToPost(c *gin.Context) {
 	postID, parseErr := strconv.ParseInt(c.Param("postID"), 10, 64)
 	if parseErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -203,7 +217,7 @@ func (s *APIHandlers) SearchCommentsInPost(c *gin.Context) {
 		return
 	}
 
-	var response []gin.H
+	response := []gin.H{}
 	for _, comment := range comments {
 		response = append(response, gin.H{
 			"commentId": comment.ID.Int64,
@@ -247,6 +261,53 @@ func (s *APIHandlers) GetComment(c *gin.Context) {
 	})
 }
 
+func (s *APIHandlers) GetRepliesToComment(c *gin.Context) {
+	postID, parseErr := strconv.ParseInt(c.Param("postID"), 10, 64)
+	if parseErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": parseErr.Error(),
+		})
+		return
+	}
+
+	commentID, parseErr := strconv.ParseInt(c.Param("commentID"), 10, 64)
+	if parseErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": parseErr.Error(),
+		})
+		return
+	}
+
+	var options models.SearchCommentsOptions
+	if err := c.ShouldBindQuery(&options); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	options.PostID = postID
+	options.ParentCommentID = null.NewInt(commentID, true)
+	comments, err := s.services.SearchCommentsInPost(&options)
+	if err != nil {
+		c.JSON(err.Code, gin.H{
+			"error": err.Message,
+		})
+		return
+	}
+
+	response := []gin.H{}
+	for _, comment := range comments {
+		response = append(response, gin.H{
+			"commentId": comment.ID.Int64,
+			"content":   comment.Content.String,
+			"authorId":  comment.AuthorID.Int64,
+			"createdAt": comment.CreatedAt.Time,
+		})
+	}
+	c.JSON(http.StatusOK, response)
+}
+
 func (s *APIHandlers) SearchTopics(c *gin.Context) {
 	var options models.SearchTopicsOptions
 	if err := c.ShouldBindQuery(&options); err != nil {
@@ -264,7 +325,7 @@ func (s *APIHandlers) SearchTopics(c *gin.Context) {
 		return
 	}
 
-	var response []gin.H
+	response := []gin.H{}
 	for _, topic := range topics {
 		response = append(response, gin.H{
 			"topicId": topic.ID.Int64,
@@ -292,10 +353,22 @@ func (s *APIHandlers) GetTopic(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"topic": topic.Topic.String,
-		"hub":   topic.Hub.String,
-	})
+	if c.Query("topic") == "true" {
+		c.JSON(http.StatusOK, gin.H{
+			"topic": topic.Topic.String,
+		})
+	} else if c.Query("topic") == "false" || c.Query("topic") == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"topic":       topic.Topic.String,
+			"hub":         topic.Hub.String,
+			"description": topic.Description.String,
+		})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "unknown query for topic",
+		})
+	}
+
 }
 
 func (s *APIHandlers) SearchTags(c *gin.Context) {
@@ -315,7 +388,7 @@ func (s *APIHandlers) SearchTags(c *gin.Context) {
 		return
 	}
 
-	var response []gin.H
+	response := []gin.H{}
 	for _, tag := range tags {
 		response = append(response, gin.H{
 			"tagId": tag.ID.Int64,

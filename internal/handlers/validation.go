@@ -41,7 +41,7 @@ type editPostJSON struct {
 	RemovedTagsID []int64     `json:"removedTagsId"`
 }
 
-type createCommentOnPostJSON struct {
+type replyToPostJSON struct {
 	Content string `json:"content" binding:"required"`
 	PostID  int64  `json:"postId" binding:"required"`
 }

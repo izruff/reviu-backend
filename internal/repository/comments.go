@@ -37,6 +37,13 @@ func (q *PostgresQueries) GetCommentsWithOptions(options *models.SearchCommentsO
 	whereQueries = append(whereQueries, "post_id=$1")
 	queryArgs = append(queryArgs, options.PostID)
 	argsIndex := 2
+	if options.ParentCommentID.Valid {
+		whereQueries = append(whereQueries, "parent_comment_id=$2")
+		queryArgs = append(queryArgs, options.ParentCommentID.Int64)
+		argsIndex++
+	} else {
+		whereQueries = append(whereQueries, "parent_comment_id IS NULL")
+	}
 
 	if options.Query != "" {
 		whereQueries = append(whereQueries, "content %>> $"+strconv.Itoa(argsIndex))
@@ -45,6 +52,9 @@ func (q *PostgresQueries) GetCommentsWithOptions(options *models.SearchCommentsO
 	}
 
 	if options.SortBy == "similarity" {
+		if options.Query == "" {
+			return nil, errors.New("unexpected error: cannot sort by similarity when no query is given")
+		}
 		orderBy = "content <->>> $" + strconv.Itoa(argsIndex)
 		queryArgs = append(queryArgs, options.Query)
 		argsIndex++

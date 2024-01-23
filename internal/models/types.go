@@ -1,5 +1,7 @@
 package models
 
+import "gopkg.in/guregu/null.v3"
+
 // TODOS
 
 type SearchUsersOptions struct {
@@ -35,8 +37,9 @@ type SearchPostsOptions struct {
 }
 
 type SearchCommentsOptions struct {
-	PostID int64  // will be included from context.Param() function.
-	Query  string `form:"q"`
+	PostID          int64
+	ParentCommentID null.Int
+	Query           string `form:"q"`
 
 	// similarity: sort by the similarity of word composition, using pg_trgm extension.
 	// age-asc (default): sort from the newest post.

@@ -59,5 +59,10 @@ func (s *APIServices) MarkCommentAsDeletedByID(commentID int64, postID int64, re
 }
 
 func (s *APIServices) SearchCommentsInPost(options *models.SearchCommentsOptions) ([]models.Comment, *SvcError) {
-	return nil, nil // TODO
+	comments, err := s.queries.GetCommentsWithOptions(options)
+	if err != nil {
+		return nil, newErrInternal(err) // TODO: error handling when there are incorrect options
+	}
+
+	return comments, nil
 }

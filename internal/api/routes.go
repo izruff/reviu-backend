@@ -3,6 +3,8 @@ package api
 import "github.com/gin-gonic/gin"
 
 func SetupRoutes(r *gin.Engine, s *APIServer) {
+	r.Use(s.handlers.CORSMiddleware)
+
 	// These routes are classified into four categories:
 	//   account: requests related to user authentication,
 	//   public: requests which can be made by any visitor,
@@ -33,10 +35,11 @@ func SetupRoutes(r *gin.Engine, s *APIServer) {
 		posts := public.Group("/posts")
 		posts.GET("/", s.handlers.SearchPosts)
 		posts.GET("/id/:postID", s.handlers.GetPost)
+		posts.GET("/id/:postID/replies", s.handlers.GetRepliesToPost)
 
 		comments := public.Group("/posts/id/:postID/comments")
-		comments.GET("/", s.handlers.SearchCommentsInPost)
 		comments.GET("/id/:commentID", s.handlers.GetComment)
+		comments.GET("/id/:commentID/replies", s.handlers.GetRepliesToComment)
 
 		topics := public.Group("/topics")
 		topics.GET("/", s.handlers.SearchTopics)
@@ -61,7 +64,7 @@ func SetupRoutes(r *gin.Engine, s *APIServer) {
 		post := posts.Group("/id/:postID")
 		{
 			post.PATCH("/edit", s.handlers.EditPost)
-			post.POST("/comment", s.handlers.CreateCommentOnPost)
+			post.POST("/reply", s.handlers.ReplyToPost)
 			post.POST("/vote", s.handlers.VotePost)
 			post.POST("/bookmark", s.handlers.BookmarkPost)
 

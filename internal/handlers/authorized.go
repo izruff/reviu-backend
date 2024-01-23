@@ -69,7 +69,7 @@ func (s *APIHandlers) GetUserSubscriptions(c *gin.Context) {
 
 	// We use the subscription model so it can store user preferences later
 
-	var response []gin.H
+	response := []gin.H{}
 	for _, subscription := range subscriptions {
 		response = append(response, gin.H{
 			"topicId": subscription.TopicID.Int64,
@@ -90,9 +90,9 @@ func (s *APIHandlers) GetUserBookmarks(c *gin.Context) {
 		return
 	}
 
-	// We use the bookmark model so it can store user preferences later
+	// TODO: we use the bookmark model so it can store user preferences later (?)
 
-	var response []gin.H
+	response := []gin.H{}
 	for _, bookmark := range bookmarks {
 		response = append(response, gin.H{
 			"postId": bookmark.PostID.Int64,
@@ -211,11 +211,11 @@ func (s *APIHandlers) EditPost(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (s *APIHandlers) CreateCommentOnPost(c *gin.Context) {
+func (s *APIHandlers) ReplyToPost(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
-	var json createCommentOnPostJSON
+	var json replyToPostJSON
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
