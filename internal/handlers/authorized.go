@@ -41,7 +41,6 @@ func (s *APIHandlers) GetUserPrivates(c *gin.Context) {
 	userID := value.(int64)
 
 	user, err := s.services.GetUserByID(userID)
-	// TODO: have short or long option
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -49,7 +48,6 @@ func (s *APIHandlers) GetUserPrivates(c *gin.Context) {
 		return
 	}
 
-	// TODO: add more info such as follow count
 	c.JSON(http.StatusOK, gin.H{
 		"email": user.Email.String,
 	})

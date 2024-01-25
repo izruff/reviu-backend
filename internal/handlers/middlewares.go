@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,15 +24,15 @@ func (s *APIHandlers) CORSMiddleware(c *gin.Context) {
 }
 
 func (s *APIHandlers) JWTAuth(c *gin.Context) {
-	authHeader := c.GetHeader("Authorization")
-	if authHeader[:6] != "Bearer" {
+	tokenString, err := c.Cookie("token")
+	fmt.Println(tokenString)
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"error": "no valid authorization header",
+			"error": err.Error(),
 		})
 		return
 	}
 
-	tokenString := authHeader[7:]
 	userID, err := utils.IsValidJWT(tokenString)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{

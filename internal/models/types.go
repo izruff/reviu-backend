@@ -2,8 +2,6 @@ package models
 
 import "gopkg.in/guregu/null.v3"
 
-// TODOS
-
 type SearchUsersOptions struct {
 	Query string `form:"q"`
 
@@ -62,7 +60,7 @@ type SearchTopicsOptions struct {
 	MustMatch string `form:"must-match"`
 }
 
-type SearchTagsOptions struct { // TODO
+type SearchTagsOptions struct {
 	Query string `form:"q"`
 
 	// similarity (default): sort by the similarity of word composition, using pg_trgm extension.

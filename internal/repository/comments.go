@@ -30,6 +30,7 @@ func (q *PostgresQueries) GetCommentByID(id int64) (*models.Comment, error) {
 }
 
 func (q *PostgresQueries) GetCommentsWithOptions(options *models.SearchCommentsOptions) ([]models.Comment, error) {
+	// TODO: error handling when post does not exist
 	var whereQueries []string
 	var orderBy string
 	var queryArgs []interface{}

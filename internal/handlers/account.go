@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/izruff/reviu-backend/internal/utils"
 )
 
 func (h *APIHandlers) Login(c *gin.Context) {
@@ -23,9 +24,10 @@ func (h *APIHandlers) Login(c *gin.Context) {
 		return
 	}
 
+	c.SetCookie("token", token, utils.CookieExpiryMinutes*60, "/", "localhost", false, true)
+
 	c.JSON(http.StatusOK, gin.H{
 		"userId": userID,
-		"token":  token,
 	})
 }
 
@@ -46,9 +48,10 @@ func (h *APIHandlers) Signup(c *gin.Context) {
 		return
 	}
 
+	c.SetCookie("token", token, utils.CookieExpiryMinutes*60, "/", "localhost", false, true)
+
 	c.JSON(http.StatusCreated, gin.H{
 		"userId": userID,
-		"token":  token,
 	})
 }
 
