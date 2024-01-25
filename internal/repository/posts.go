@@ -35,10 +35,6 @@ func (q *PostgresQueries) GetPostsWithOptions(options *models.SearchPostsOptions
 	var queryArgs []interface{}
 	argsIndex := 1
 
-	if options.Query == "" {
-		return nil, errors.New("unexpected error: query is empty") // TODO: this should be allowed for browsing or searching recommendations
-	}
-
 	if options.SortBy == "similarity" {
 		if options.MatchWith == "title" {
 			orderBy = "title <->>> $" + strconv.Itoa(argsIndex)
@@ -59,16 +55,18 @@ func (q *PostgresQueries) GetPostsWithOptions(options *models.SearchPostsOptions
 		return nil, errors.New("unexpected error: invalid option for sort-by")
 	}
 
-	if options.MatchWith == "title" {
-		whereQueries = append(whereQueries, "title %>> $"+strconv.Itoa(argsIndex))
-		queryArgs = append(queryArgs, options.Query)
-		argsIndex++
-	} else if options.MatchWith == "all" || options.MatchWith == "" {
-		whereQueries = append(whereQueries, "(title %>> $"+strconv.Itoa(argsIndex)+" OR content %>> $"+strconv.Itoa(argsIndex+1)+")")
-		queryArgs = append(queryArgs, options.Query, options.Query)
-		argsIndex += 2
-	} else {
-		return nil, errors.New("unexpected error: invalid option for match-with")
+	if options.Query != "" {
+		if options.MatchWith == "title" {
+			whereQueries = append(whereQueries, "title %>> $"+strconv.Itoa(argsIndex))
+			queryArgs = append(queryArgs, options.Query)
+			argsIndex++
+		} else if options.MatchWith == "all" || options.MatchWith == "" {
+			whereQueries = append(whereQueries, "(title %>> $"+strconv.Itoa(argsIndex)+" OR content %>> $"+strconv.Itoa(argsIndex+1)+")")
+			queryArgs = append(queryArgs, options.Query, options.Query)
+			argsIndex += 2
+		} else {
+			return nil, errors.New("unexpected error: invalid option for match-with")
+		}
 	}
 
 	// TODO: handle topics and tags list

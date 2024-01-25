@@ -32,7 +32,7 @@ func (q *PostgresQueries) GetTagsWithOptions(options *models.SearchTagsOptions) 
 	argsIndex := 1
 
 	if options.Query == "" {
-		return nil, errors.New("unexpected error: query is empty") // TODO: this should be allowed for browsing
+		return nil, errors.New("unexpected error: query is empty")
 	}
 
 	if options.SortBy == "similarity" {
