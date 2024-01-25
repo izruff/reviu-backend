@@ -30,5 +30,10 @@ func (s *APIServices) GetTagByID(id int64) (*models.Tag, *SvcError) {
 }
 
 func (s *APIServices) SearchTags(options *models.SearchTagsOptions) ([]models.Tag, *SvcError) {
-	return nil, nil // TODO
+	tags, err := s.queries.GetTagsWithOptions(options)
+	if err != nil {
+		return nil, newErrInternal(err) // TODO: error handling when there are incorrect options
+	}
+
+	return tags, nil
 }

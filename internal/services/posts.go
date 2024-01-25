@@ -75,16 +75,28 @@ func (s *APIServices) MarkPostAsDeletedByID(id int64, reasonForDeletion string, 
 }
 
 func (s *APIServices) VotePost(id int64, userID int64, up bool) *SvcError {
-	return nil // TODO
+	// TODO: this logic is assuming there is no possibility for internal errors other than that when the vote does not exist
+	if err := s.queries.UpdateVote(up, id, userID); err != nil {
+		newVote := &models.Vote{
+			Up:     null.NewBool(up, true),
+			PostID: null.NewInt(id, true),
+			UserID: null.NewInt(userID, true),
+		}
+		if err := s.queries.CreateVote(newVote); err != nil {
+			return newErrInternal(err)
+		}
+	}
+
+	return nil
 }
 
 func (s *APIServices) SearchPosts(options *models.SearchPostsOptions) ([]models.Post, *SvcError) {
-	users, err := s.queries.GetPostsWithOptions(options)
+	posts, err := s.queries.GetPostsWithOptions(options)
 	if err != nil {
 		return nil, newErrInternal(err) // TODO: error handling when there are incorrect options
 	}
 
-	return users, nil // TODO
+	return posts, nil
 }
 
 func (s *APIServices) GetPostsByAuthorID(authorID int64) *SvcError {

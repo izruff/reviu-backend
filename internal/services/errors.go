@@ -1,13 +1,16 @@
 package services
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
 type SvcError struct {
 	Code    int
 	Message string
 }
 
-// TODO: create more errors
+// Internal server error; for any unexpected error that is not categorized here
 func newErrInternal(err error) *SvcError {
 	return &SvcError{
 		Code:    http.StatusInternalServerError,
@@ -15,6 +18,7 @@ func newErrInternal(err error) *SvcError {
 	}
 }
 
+// Error for invalid, expired, or non-existent credentials
 func newErrInvalidCredentials(errMessage string) *SvcError {
 	return &SvcError{
 		Code:    http.StatusUnauthorized,
@@ -22,9 +26,11 @@ func newErrInvalidCredentials(errMessage string) *SvcError {
 	}
 }
 
-func newErrInvalidUserInput(errMessage string) *SvcError {
+// Error for invalid user input
+// Message format: "invalid user input: email, username"
+func newErrInvalidUserInput(invalidFields []string) *SvcError {
 	return &SvcError{
 		Code:    http.StatusBadRequest,
-		Message: errMessage,
+		Message: "invalid user input: " + strings.Join(invalidFields, ", "),
 	}
 }

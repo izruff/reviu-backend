@@ -133,6 +133,21 @@ func (s *APIHandlers) GetUserFollowings(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (s *APIHandlers) GetUserIDByUsername(c *gin.Context) {
+	username := c.Param("username")
+	userID, err := s.services.GetUserIDByUsername(username)
+	if err != nil {
+		c.JSON(err.Code, gin.H{
+			"error": err.Message,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"userId": userID,
+	})
+}
+
 func (s *APIHandlers) SearchPosts(c *gin.Context) {
 	var options models.SearchPostsOptions
 	if err := c.ShouldBindQuery(&options); err != nil {

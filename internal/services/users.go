@@ -81,6 +81,15 @@ func (s *APIServices) GetUserByID(id int64) (*models.User, *SvcError) {
 	return user, nil
 }
 
+func (s *APIServices) GetUserIDByUsername(username string) (int64, *SvcError) {
+	userID, err := s.queries.GetUserIDByUsername(username)
+	if err != nil {
+		return 0, newErrInternal(err) // TODO: error handling when user does not exist
+	}
+
+	return userID, nil
+}
+
 func (s *APIServices) UpdateUserByID(id int64, updatedUser *models.User) *SvcError {
 	// TODO: error handling when there are no changes
 	updatedUser.ID.Int64 = id
