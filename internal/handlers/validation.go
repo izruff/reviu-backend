@@ -29,8 +29,9 @@ type followOrUnfollowUserJSON struct {
 type createPostJSON struct {
 	Title   string   `json:"title" binding:"required"`
 	Content string   `json:"content" binding:"required"`
-	TopicID int64    `json:"topicId" binding:"required"`
-	Tags    []string `json:"tagsId"`
+	Topic   string   `json:"topic" binding:"required"`
+	Hub     string   `json:"hub" binding:"required"`
+	Tags    []string `json:"tags"`
 }
 
 type editPostJSON struct {

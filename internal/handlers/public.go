@@ -133,7 +133,7 @@ func (s *APIHandlers) GetUserFollowings(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (s *APIHandlers) GetUserIDByUsername(c *gin.Context) {
+func (s *APIHandlers) GetUserProfileByUsername(c *gin.Context) {
 	username := c.Param("username")
 	userID, err := s.services.GetUserIDByUsername(username)
 	if err != nil {
@@ -143,8 +143,23 @@ func (s *APIHandlers) GetUserIDByUsername(c *gin.Context) {
 		return
 	}
 
+	user, err := s.services.GetUserByID(userID)
+	if err != nil {
+		c.JSON(err.Code, gin.H{
+			"error": err.Message,
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"userId": userID,
+		"username":       user.Username.String,
+		"nickname":       user.Nickname.String,
+		"about":          user.About.String,
+		"createdAt":      user.CreatedAt.Time,
+		"followerCount":  0,
+		"followingCount": 0,
+		"postCount":      0,
+		"rating":         0,
 	})
 }
 

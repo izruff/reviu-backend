@@ -155,7 +155,7 @@ func (s *APIHandlers) CreatePost(c *gin.Context) {
 		return
 	}
 
-	postID, err := s.services.CreatePost(json.Title, json.Content, userID, json.TopicID, json.Tags)
+	postID, err := s.services.CreatePost(json.Title, json.Content, userID, json.Topic, json.Hub, json.Tags)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,

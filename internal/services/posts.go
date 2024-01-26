@@ -5,7 +5,23 @@ import (
 	"gopkg.in/guregu/null.v3"
 )
 
-func (s *APIServices) CreatePost(title string, content string, authorID int64, topicID int64, tags []string) (int64, *SvcError) {
+func (s *APIServices) CreatePost(title string, content string, authorID int64, topic string, hub string, tags []string) (int64, *SvcError) {
+	newTopic := &models.Topic{
+		Topic: null.NewString(topic, true),
+		Hub:   null.NewString(hub, true),
+	}
+	topicID, err := s.queries.CreateTopic(newTopic)
+	if err != nil {
+		if true { // TODO: error handling when tag already exists (replace true with err != ...)
+			topicID, err = s.queries.GetTopicID(topic, hub)
+			if err != nil {
+				return 0, newErrInternal(err)
+			}
+		} else {
+			return 0, newErrInternal(err)
+		}
+	}
+
 	newPost := &models.Post{
 		Title:    null.NewString(title, true),
 		Content:  null.NewString(content, true),
@@ -19,15 +35,13 @@ func (s *APIServices) CreatePost(title string, content string, authorID int64, t
 		return 0, newErrInternal(err)
 	}
 
-	topic, _ := s.queries.GetTopicByID(topicID)
-	hub := topic.Hub
 	for _, tag := range tags {
 		newTag := &models.Tag{
 			Tag: null.NewString(tag, true),
-			Hub: hub,
+			Hub: null.NewString(hub, true),
 		}
 		tagID, err := s.queries.CreateTag(newTag) // return tagID or not?
-		if err != nil && true {                   // TODO: error handling when tag already exists (replace true with condition)
+		if err != nil && true {                   // TODO: error handling when tag already exists (replace true with err != ...)
 			return 0, newErrInternal(err)
 		}
 

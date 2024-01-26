@@ -31,7 +31,7 @@ func SetupRoutes(r *gin.Engine, s *APIServer) {
 			user.GET("/followers", s.handlers.GetUserFollowers)
 			user.GET("/followings", s.handlers.GetUserFollowings)
 		}
-		users.GET("/name/:username", s.handlers.GetUserIDByUsername)
+		users.GET("/name/:username", s.handlers.GetUserProfileByUsername)
 
 		posts := public.Group("/posts")
 		posts.GET("/", s.handlers.SearchPosts)

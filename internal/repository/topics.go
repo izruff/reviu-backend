@@ -26,6 +26,15 @@ func (q *PostgresQueries) GetTopicByID(id int64) (*models.Topic, error) {
 	return topic, nil
 }
 
+func (q *PostgresQueries) GetTopicID(topic string, hub string) (int64, error) {
+	var topicID int64
+	if err := q.selectOne(&topicID, "topics", "id", "topic=$1 AND hub=$2", topic, hub); err != nil {
+		return 0, err // TODO: error handling when user does not exist
+	}
+
+	return topicID, nil
+}
+
 func (q *PostgresQueries) GetTopicsWithOptions(options *models.SearchTopicsOptions) ([]models.Topic, error) {
 	var whereQuery, orderBy string
 	var queryArgs []interface{}
