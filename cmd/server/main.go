@@ -20,7 +20,8 @@ func main() {
 	}
 
 	listenAddr := os.Getenv("LISTEN_ADDR")
-	server := api.NewAPIServer(listenAddr, db)
+	origin := os.Getenv("ORIGIN")
+	server := api.NewAPIServer(listenAddr, db, origin)
 
 	server.Run()
 }

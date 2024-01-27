@@ -7,12 +7,14 @@ import (
 
 type APIHandlers struct {
 	services *services.APIServices
+	origin   string
 }
 
-func NewAPIHandlers(db *sqlx.DB) *APIHandlers {
+func NewAPIHandlers(db *sqlx.DB, origin string) *APIHandlers {
 	services := services.NewAPIServices(db)
 
 	return &APIHandlers{
 		services: services,
+		origin:   origin,
 	}
 }

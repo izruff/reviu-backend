@@ -9,14 +9,16 @@ import (
 
 type APIServer struct {
 	listenAddr string
+	origin     string
 	handlers   *handlers.APIHandlers
 }
 
-func NewAPIServer(listenAddr string, db *sqlx.DB) *APIServer {
-	handlers := handlers.NewAPIHandlers(db)
+func NewAPIServer(listenAddr string, db *sqlx.DB, origin string) *APIServer {
+	handlers := handlers.NewAPIHandlers(db, origin)
 
 	return &APIServer{
 		listenAddr: listenAddr,
+		origin:     origin,
 		handlers:   handlers,
 	}
 }
