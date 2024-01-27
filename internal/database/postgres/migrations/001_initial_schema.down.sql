@@ -1,6 +1,6 @@
 BEGIN;
 
-DROP EXTENSION pg_trgm;
+DROP EXTENSION IF EXISTS pg_trgm;
 DROP TABLE IF EXISTS ban_history;
 DROP TABLE IF EXISTS subscriptions;
 DROP TABLE IF EXISTS relations;

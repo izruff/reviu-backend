@@ -123,6 +123,6 @@ CREATE TABLE IF NOT EXISTS ban_history (
 );
 
 -- install pg_trgm extension
-CREATE EXTENSION pg_trgm;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 COMMIT;
