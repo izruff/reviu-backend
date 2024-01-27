@@ -25,6 +25,7 @@ func (h *APIHandlers) Login(c *gin.Context) {
 	}
 
 	c.SetCookie("token", token, utils.CookieExpiryMinutes*60, "/", "", false, true)
+	c.SetSameSite(http.SameSiteNoneMode)
 
 	c.JSON(http.StatusOK, gin.H{
 		"userId": userID,
@@ -49,6 +50,7 @@ func (h *APIHandlers) Signup(c *gin.Context) {
 	}
 
 	c.SetCookie("token", token, utils.CookieExpiryMinutes*60, "/", "", false, true)
+	c.SetSameSite(http.SameSiteNoneMode)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"userId": userID,
