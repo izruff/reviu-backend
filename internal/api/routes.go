@@ -5,6 +5,9 @@ import "github.com/gin-gonic/gin"
 func SetupRoutes(r *gin.Engine, s *APIServer) {
 	r.Use(s.handlers.CORSMiddleware)
 
+	// Simple route for testing ping.
+	r.GET("/ping", s.handlers.Ping)
+
 	// These routes are classified into four categories:
 	//   account: requests related to user authentication,
 	//   public: requests which can be made by any visitor,

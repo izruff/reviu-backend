@@ -9,6 +9,10 @@ import (
 	"gopkg.in/guregu/null.v3"
 )
 
+func (s *APIHandlers) Ping(c *gin.Context) {
+	c.String(http.StatusOK, "pong")
+}
+
 func (s *APIHandlers) SearchUsers(c *gin.Context) {
 	var options models.SearchUsersOptions
 	if err := c.ShouldBindQuery(&options); err != nil {
