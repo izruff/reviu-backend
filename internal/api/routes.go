@@ -47,7 +47,11 @@ func SetupRoutes(r *gin.Engine, s *APIServer) {
 
 		topics := public.Group("/topics")
 		topics.GET("/", s.handlers.SearchTopics)
-		topics.GET("/id/:topicID", s.handlers.GetTopic)
+		topic := topics.Group("/id/:topicID")
+		{
+			topic.GET("/", s.handlers.GetTopic)
+		}
+		// topics.GET("/id/:topicID", s.handlers.GetTopic)
 
 		tags := public.Group("/tags")
 		tags.GET("/", s.handlers.SearchTags)
