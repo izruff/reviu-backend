@@ -156,6 +156,15 @@ func (s *APIServices) GetUserFollowers(id int64) ([]models.User, *SvcError) {
 	return users, nil
 }
 
+func (s *APIServices) GetUserFollowerCount(id int64) (int64, *SvcError) {
+	count, err := s.queries.CountFollowersFromUserID(id)
+	if err != nil {
+		return 0, newErrInternal(err) // TODO: error handling when user does not exist
+	}
+
+	return count, nil
+}
+
 func (s *APIServices) GetUserFollowings(id int64) ([]models.User, *SvcError) {
 	followings, err := s.queries.GetFollowingsFromUserID(id)
 	if err != nil {
@@ -172,6 +181,30 @@ func (s *APIServices) GetUserFollowings(id int64) ([]models.User, *SvcError) {
 	}
 
 	return users, nil
+}
+
+func (s *APIServices) GetUserFollowingCount(id int64) (int64, *SvcError) {
+	count, err := s.queries.CountFollowingsFromUserID(id)
+	if err != nil {
+		return 0, newErrInternal(err) // TODO: error handling when user does not exist
+	}
+
+	return count, nil
+}
+
+func (s *APIServices) GetUserPostCount(id int64) (int64, *SvcError) {
+	count, err := s.queries.CountPostsFromAuthorID(id)
+	if err != nil {
+		return 0, newErrInternal(err) // TODO: error handling when user does not exist
+	}
+
+	return count, nil
+}
+
+func (s *APIServices) GetUserRating(id int64) (int64, *SvcError) {
+	// TODO: create the column in database
+
+	return 0, nil
 }
 
 func (s *APIServices) GetUserSubscriptions(id int64) ([]models.Subscription, *SvcError) {

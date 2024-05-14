@@ -145,7 +145,7 @@ func (q *PostgresQueries) deleteWhere(table string, mustDeleteOne bool, whereQue
 
 func (q *PostgresQueries) count(table string, column string, whereQuery string, whereArgs ...interface{}) (int64, error) {
 	var count int64
-	if err := q.db.Get(count, "SELECT count("+column+") FROM "+table+" WHERE "+whereQuery, whereArgs...); err != nil {
+	if err := q.db.Get(&count, "SELECT count("+column+") FROM "+table+" WHERE "+whereQuery, whereArgs...); err != nil {
 		return 0, err
 	}
 

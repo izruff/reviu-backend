@@ -21,6 +21,7 @@ func (q *PostgresQueries) GetFollowersFromUserID(userID int64) ([]models.Relatio
 }
 
 func (q *PostgresQueries) CountFollowersFromUserID(userID int64) (int64, error) {
+	// TODO: possibly optimize this by creating a new column in the database
 	count, err := q.count("relations", "follower_id", "following_id=$1", userID)
 	if err != nil {
 		return 0, err
@@ -39,6 +40,7 @@ func (q *PostgresQueries) GetFollowingsFromUserID(userID int64) ([]models.Relati
 }
 
 func (q *PostgresQueries) CountFollowingsFromUserID(userID int64) (int64, error) {
+	// TODO: same as CountFollowersFromUserID
 	count, err := q.count("relations", "following_id", "follower_id=$1", userID)
 	if err != nil {
 		return 0, err

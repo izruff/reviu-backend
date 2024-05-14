@@ -79,6 +79,17 @@ func (q *PostgresQueries) GetPostsWithOptions(options *models.SearchPostsOptions
 	return posts, nil
 }
 
+func (q *PostgresQueries) CountPostsFromAuthorID(userID int64) (int64, error) {
+	// TODO: possibly optimize this by creating a new column in the database
+	// TODO: handle logic for deleted and/or edited posts
+	count, err := q.count("posts", "id", "author_id=$1", userID)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 func (q *PostgresQueries) UpdatePostByID(updatedPost *models.Post) error {
 	if !updatedPost.ID.Valid {
 		return errors.New("ID not provided")
