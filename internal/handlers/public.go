@@ -176,6 +176,7 @@ func (s *APIHandlers) GetUserFollowings(c *gin.Context) {
 }
 
 func (s *APIHandlers) GetUserProfileByUsername(c *gin.Context) {
+	// TODO: refactor this and GetUserProfile
 	username := c.Param("username")
 	userID, err := s.services.GetUserIDByUsername(username)
 	if err != nil {
@@ -193,16 +194,64 @@ func (s *APIHandlers) GetUserProfileByUsername(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"username":       user.Username.String,
-		"nickname":       user.Nickname.String,
-		"about":          user.About.String,
-		"createdAt":      user.CreatedAt.Time,
-		"followerCount":  0,
-		"followingCount": 0,
-		"postCount":      0,
-		"rating":         0,
-	})
+	if c.Query("username") == "true" {
+		c.JSON(http.StatusOK, gin.H{
+			"username": user.Username.String,
+		})
+		return
+	}
+
+	// TODO: simplify the following code
+
+	followerCount, err := s.services.GetUserFollowerCount(userID)
+	if err != nil {
+		c.JSON(err.Code, gin.H{
+			"error": err.Message,
+		})
+		return
+	}
+
+	followingCount, err := s.services.GetUserFollowingCount(userID)
+	if err != nil {
+		c.JSON(err.Code, gin.H{
+			"error": err.Message,
+		})
+		return
+	}
+
+	postCount, err := s.services.GetUserPostCount(userID)
+	if err != nil {
+		c.JSON(err.Code, gin.H{
+			"error": err.Message,
+		})
+		return
+	}
+
+	// TODO: currently hard-coded to 0, see comment in GetUserRating
+	rating, err := s.services.GetUserRating(userID)
+	if err != nil {
+		c.JSON(err.Code, gin.H{
+			"error": err.Message,
+		})
+		return
+	}
+
+	if c.Query("username") == "false" || c.Query("username") == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"username":       user.Username.String,
+			"nickname":       user.Nickname.String,
+			"about":          user.About.String,
+			"createdAt":      user.CreatedAt.Time,
+			"followerCount":  followerCount,
+			"followingCount": followingCount,
+			"postCount":      postCount,
+			"rating":         rating,
+		})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "unknown query for username",
+		})
+	}
 }
 
 func (s *APIHandlers) SearchPosts(c *gin.Context) {
