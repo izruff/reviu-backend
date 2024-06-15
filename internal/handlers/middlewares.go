@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -25,7 +24,6 @@ func (s *APIHandlers) CORSMiddleware(c *gin.Context) {
 
 func (s *APIHandlers) JWTAuth(c *gin.Context) {
 	tokenString, err := c.Cookie("token")
-	fmt.Println(tokenString)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"error": err.Error(),

@@ -57,4 +57,27 @@ func (h *APIHandlers) Signup(c *gin.Context) {
 	})
 }
 
+func (h *APIHandlers) CheckToken(c *gin.Context) {
+	tokenString, err := c.Cookie("token")
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "none",
+		})
+		return
+	}
+
+	userID, err := utils.IsValidJWT(tokenString)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status": "error",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"userId": userID,
+	})
+}
+
 // TODO: recoverAccount, changePassword, changeEmail, and maybe refactoring

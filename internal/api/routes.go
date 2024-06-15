@@ -18,6 +18,7 @@ func SetupRoutes(r *gin.Engine, s *APIServer) {
 	{
 		account.POST("/login", s.handlers.Login)
 		account.POST("/signup", s.handlers.Signup)
+		account.GET("/check-token", s.handlers.CheckToken)
 
 		// For security purposes, the actions below require a full login
 		// (email/username and password input), not a JWT token.
