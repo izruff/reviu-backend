@@ -34,16 +34,16 @@ func (q *PostgresQueries) GetCommentsWithOptions(options *models.SearchCommentsO
 	var whereQueries []string
 	var orderBy string
 	var queryArgs []interface{}
+	argsIndex := 1
 
-	whereQueries = append(whereQueries, "post_id=$1")
-	queryArgs = append(queryArgs, options.PostID)
-	argsIndex := 2
 	if options.ParentCommentID.Valid {
-		whereQueries = append(whereQueries, "parent_comment_id=$2")
+		whereQueries = append(whereQueries, "parent_comment_id=$"+strconv.Itoa(argsIndex))
 		queryArgs = append(queryArgs, options.ParentCommentID.Int64)
 		argsIndex++
-	} else {
-		whereQueries = append(whereQueries, "parent_comment_id IS NULL")
+	} else if options.PostID.Valid {
+		whereQueries = append(whereQueries, "post_id=$"+strconv.Itoa(argsIndex))
+		queryArgs = append(queryArgs, options.PostID)
+		argsIndex++
 	}
 
 	if options.Query != "" {

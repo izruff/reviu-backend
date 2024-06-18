@@ -58,13 +58,11 @@ type bookmarkPostJSON struct {
 
 type replyToCommentJSON struct {
 	Content         string `json:"content" binding:"required"`
-	PostID          int64  `json:"postId" binding:"required"`
 	ParentCommentID int64  `json:"parentCommentID" binding:"required"`
 }
 
 type editCommentJSON struct {
 	CommentID int64  `json:"commentId" binding:"required"`
-	PostID    int64  `json:"postId" binding:"required"`
 	Content   string `json:"content" binding:"required"`
 }
 

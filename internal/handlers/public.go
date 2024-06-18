@@ -321,6 +321,30 @@ func (s *APIHandlers) GetRepliesToPost(c *gin.Context) {
 		return
 	}
 
+	options := &models.SearchCommentsOptions{
+		PostID: null.NewInt(postID, true),
+	}
+	comments, err := s.services.SearchComments(options)
+	if err != nil {
+		c.JSON(err.Code, gin.H{
+			"error": err.Message,
+		})
+		return
+	}
+
+	response := []gin.H{}
+	for _, comment := range comments {
+		response = append(response, gin.H{
+			"commentId": comment.ID.Int64,
+			"content":   comment.Content.String,
+			"authorId":  comment.AuthorID.Int64,
+			"createdAt": comment.CreatedAt.Time,
+		})
+	}
+	c.JSON(http.StatusOK, response)
+}
+
+func (s *APIHandlers) SearchComments(c *gin.Context) {
 	var options models.SearchCommentsOptions
 	if err := c.ShouldBindQuery(&options); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -329,8 +353,7 @@ func (s *APIHandlers) GetRepliesToPost(c *gin.Context) {
 		return
 	}
 
-	options.PostID = postID
-	comments, err := s.services.SearchCommentsInPost(&options)
+	comments, err := s.services.SearchComments(&options)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -351,14 +374,6 @@ func (s *APIHandlers) GetRepliesToPost(c *gin.Context) {
 }
 
 func (s *APIHandlers) GetComment(c *gin.Context) {
-	postID, parseErr := strconv.ParseInt(c.Param("postID"), 10, 64)
-	if parseErr != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": parseErr.Error(),
-		})
-		return
-	}
-
 	commentID, parseErr := strconv.ParseInt(c.Param("commentID"), 10, 64)
 	if parseErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -367,7 +382,7 @@ func (s *APIHandlers) GetComment(c *gin.Context) {
 		return
 	}
 
-	comment, err := s.services.GetCommentByID(commentID, postID)
+	comment, err := s.services.GetCommentByID(commentID)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -383,14 +398,6 @@ func (s *APIHandlers) GetComment(c *gin.Context) {
 }
 
 func (s *APIHandlers) GetRepliesToComment(c *gin.Context) {
-	postID, parseErr := strconv.ParseInt(c.Param("postID"), 10, 64)
-	if parseErr != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": parseErr.Error(),
-		})
-		return
-	}
-
 	commentID, parseErr := strconv.ParseInt(c.Param("commentID"), 10, 64)
 	if parseErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -399,17 +406,10 @@ func (s *APIHandlers) GetRepliesToComment(c *gin.Context) {
 		return
 	}
 
-	var options models.SearchCommentsOptions
-	if err := c.ShouldBindQuery(&options); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
+	options := &models.SearchCommentsOptions{
+		ParentCommentID: null.NewInt(commentID, true),
 	}
-
-	options.PostID = postID
-	options.ParentCommentID = null.NewInt(commentID, true)
-	comments, err := s.services.SearchCommentsInPost(&options)
+	comments, err := s.services.SearchComments(options)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,

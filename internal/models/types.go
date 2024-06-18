@@ -35,7 +35,7 @@ type SearchPostsOptions struct {
 }
 
 type SearchCommentsOptions struct {
-	PostID          int64
+	PostID          null.Int
 	ParentCommentID null.Int
 	Query           string `form:"q"`
 

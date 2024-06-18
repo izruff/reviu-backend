@@ -38,11 +38,12 @@ func SetupRoutes(r *gin.Engine, s *APIServer) {
 		users.GET("/name/:username", s.handlers.GetUserProfileByUsername)
 
 		posts := public.Group("/posts")
-		posts.GET("/", s.handlers.SearchPosts)
+		posts.GET("/search", s.handlers.SearchPosts)
 		posts.GET("/id/:postID", s.handlers.GetPost)
 		posts.GET("/id/:postID/replies", s.handlers.GetRepliesToPost)
 
-		comments := public.Group("/posts/id/:postID/comments")
+		comments := public.Group("/comments")
+		comments.GET("/search", s.handlers.SearchComments)
 		comments.GET("/id/:commentID", s.handlers.GetComment)
 		comments.GET("/id/:commentID/replies", s.handlers.GetRepliesToComment)
 
@@ -76,8 +77,11 @@ func SetupRoutes(r *gin.Engine, s *APIServer) {
 			post.POST("/reply", s.handlers.ReplyToPost)
 			post.POST("/vote", s.handlers.VotePost)
 			post.POST("/bookmark", s.handlers.BookmarkPost)
+		}
 
-			comment := post.Group("/comments/id/:commentID")
+		comments := authorized.Group("/comments")
+		comment := comments.Group("/id/:commentID")
+		{
 			comment.POST("/reply", s.handlers.ReplyToComment)
 			comment.PATCH("/edit", s.handlers.EditComment)
 		}

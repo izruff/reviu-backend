@@ -5,11 +5,23 @@ import (
 	"gopkg.in/guregu/null.v3"
 )
 
-func (s *APIServices) CreateComment(content string, authorID int64, postID int64, parentCommentID null.Int) (int64, *SvcError) {
+func (s *APIServices) CreateComment(content string, authorID int64, postID null.Int, parentCommentID null.Int) (int64, *SvcError) {
+	if !postID.Valid {
+		if !parentCommentID.Valid {
+			return 0, newErrInvalidUserInput([]string{"postID", "parentCommentID"}) // TODO: make a new type of error for this
+		}
+		parentComment, err := s.queries.GetCommentByID(parentCommentID.Int64)
+		if err != nil {
+			return 0, newErrInternal(err)
+		}
+		postID.Int64 = parentComment.PostID.Int64
+		postID.Valid = true
+	}
+
 	newComment := &models.Comment{
 		Content:         null.NewString(content, true),
 		AuthorID:        null.NewInt(authorID, true),
-		PostID:          null.NewInt(postID, true),
+		PostID:          postID,
 		ParentCommentID: parentCommentID,
 	}
 
@@ -22,11 +34,7 @@ func (s *APIServices) CreateComment(content string, authorID int64, postID int64
 	return commentID, nil
 }
 
-// Initially, I intended for the ID to start at 1 for each distinct postID, hence why the three
-// functions below needs two arguments, but I did not find a simple way to do this. So instead, here
-// the ID is the primary key and always increments by 1, so postID argument is not actually necessary.
-
-func (s *APIServices) GetCommentByID(commentID int64, postID int64) (*models.Comment, *SvcError) {
+func (s *APIServices) GetCommentByID(commentID int64) (*models.Comment, *SvcError) {
 	comment, err := s.queries.GetCommentByID(commentID)
 	if err != nil {
 		// TODO: error handling when comment does not exist
@@ -36,7 +44,7 @@ func (s *APIServices) GetCommentByID(commentID int64, postID int64) (*models.Com
 	return comment, nil
 }
 
-func (s *APIServices) UpdateCommentByID(commentID int64, postID int64, content string) *SvcError {
+func (s *APIServices) UpdateCommentByID(commentID int64, content string) *SvcError {
 	updatedComment := &models.Comment{
 		ID:      null.NewInt(commentID, true),
 		Content: null.NewString(content, true),
@@ -58,7 +66,7 @@ func (s *APIServices) MarkCommentAsDeletedByID(commentID int64, postID int64, re
 	return nil
 }
 
-func (s *APIServices) SearchCommentsInPost(options *models.SearchCommentsOptions) ([]models.Comment, *SvcError) {
+func (s *APIServices) SearchComments(options *models.SearchCommentsOptions) ([]models.Comment, *SvcError) {
 	comments, err := s.queries.GetCommentsWithOptions(options)
 	if err != nil {
 		return nil, newErrInternal(err) // TODO: error handling when there are incorrect options

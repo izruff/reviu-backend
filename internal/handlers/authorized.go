@@ -221,7 +221,7 @@ func (s *APIHandlers) ReplyToPost(c *gin.Context) {
 		return
 	}
 
-	commentID, err := s.services.CreateComment(json.Content, userID, json.PostID, null.NewInt(0, false))
+	commentID, err := s.services.CreateComment(json.Content, userID, null.NewInt(json.PostID, true), null.NewInt(0, false))
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -290,7 +290,7 @@ func (s *APIHandlers) ReplyToComment(c *gin.Context) {
 		return
 	}
 
-	commentID, err := s.services.CreateComment(json.Content, userID, json.PostID, null.NewInt(json.ParentCommentID, true))
+	commentID, err := s.services.CreateComment(json.Content, userID, null.NewInt(0, false), null.NewInt(json.ParentCommentID, true))
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -315,7 +315,7 @@ func (s *APIHandlers) EditComment(c *gin.Context) {
 		return
 	}
 
-	comment, err := s.services.GetCommentByID(json.CommentID, json.PostID)
+	comment, err := s.services.GetCommentByID(json.CommentID)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -329,7 +329,7 @@ func (s *APIHandlers) EditComment(c *gin.Context) {
 		return
 	}
 
-	if err := s.services.UpdateCommentByID(json.CommentID, json.PostID, json.Content); err != nil {
+	if err := s.services.UpdateCommentByID(json.CommentID, json.Content); err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
 		})
