@@ -266,6 +266,7 @@ func (s *APIHandlers) SearchPosts(c *gin.Context) {
 			"authorId":  post.AuthorID.Int64,
 			"topicId":   post.TopicID.Int64,
 			"createdAt": post.CreatedAt.Time,
+			"viewCount": post.ViewCount.Int64,
 		})
 	}
 	c.JSON(http.StatusOK, response)
@@ -295,6 +296,7 @@ func (s *APIHandlers) GetPost(c *gin.Context) {
 		"authorId":  post.AuthorID.Int64,
 		"topicId":   post.TopicID.Int64,
 		"createdAt": post.CreatedAt.Time,
+		"viewCount": post.ViewCount.Int64,
 	})
 }
 
