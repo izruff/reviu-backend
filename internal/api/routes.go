@@ -32,10 +32,15 @@ func SetupRoutes(r *gin.Engine, s *APIServer) {
 		user := users.Group("/id/:userID")
 		{
 			user.GET("/", s.handlers.GetUserProfile)
-			user.GET("/followers", s.handlers.GetUserFollowers)
-			user.GET("/followings", s.handlers.GetUserFollowings)
+			user.GET("/relations", s.handlers.GetUserRelations)
+			// user.GET("/activity", s.handlers.GetUserActivity)
 		}
-		users.GET("/name/:username", s.handlers.GetUserProfileByUsername)
+		userByName := users.Group("/name/:username")
+		{
+			userByName.GET("/", s.handlers.GetUserProfileByUsername)
+			userByName.GET("/relations", s.handlers.GetUserRelationsByUsername)
+			// userByName.GET("/activity", s.handlers.GetUserActivityByUsername)
+		}
 
 		posts := public.Group("/posts")
 		posts.GET("/search", s.handlers.SearchPosts)

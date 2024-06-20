@@ -65,32 +65,6 @@ func (s *APIHandlers) GetUserProfile(c *gin.Context) {
 		return
 	}
 
-	// TODO: simplify the following code
-
-	followerCount, err := s.services.GetUserFollowerCount(userID)
-	if err != nil {
-		c.JSON(err.Code, gin.H{
-			"error": err.Message,
-		})
-		return
-	}
-
-	followingCount, err := s.services.GetUserFollowingCount(userID)
-	if err != nil {
-		c.JSON(err.Code, gin.H{
-			"error": err.Message,
-		})
-		return
-	}
-
-	postCount, err := s.services.GetUserPostCount(userID)
-	if err != nil {
-		c.JSON(err.Code, gin.H{
-			"error": err.Message,
-		})
-		return
-	}
-
 	// TODO: currently hard-coded to 0, see comment in GetUserRating
 	rating, err := s.services.GetUserRating(userID)
 	if err != nil {
@@ -102,14 +76,11 @@ func (s *APIHandlers) GetUserProfile(c *gin.Context) {
 
 	if c.Query("username") == "false" || c.Query("username") == "" {
 		c.JSON(http.StatusOK, gin.H{
-			"username":       user.Username.String,
-			"nickname":       user.Nickname.String,
-			"about":          user.About.String,
-			"createdAt":      user.CreatedAt.Time,
-			"followerCount":  followerCount,
-			"followingCount": followingCount,
-			"postCount":      postCount,
-			"rating":         rating,
+			"username":  user.Username.String,
+			"nickname":  user.Nickname.String,
+			"about":     user.About.String,
+			"createdAt": user.CreatedAt.Time,
+			"rating":    rating,
 		})
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -119,7 +90,7 @@ func (s *APIHandlers) GetUserProfile(c *gin.Context) {
 
 }
 
-func (s *APIHandlers) GetUserFollowers(c *gin.Context) {
+func (s *APIHandlers) GetUserRelations(c *gin.Context) {
 	userID, parseErr := strconv.ParseInt(c.Param("userID"), 10, 64)
 	if parseErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -128,7 +99,7 @@ func (s *APIHandlers) GetUserFollowers(c *gin.Context) {
 		return
 	}
 
-	users, err := s.services.GetUserFollowers(userID)
+	followers, err := s.services.GetUserFollowers(userID)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -136,27 +107,7 @@ func (s *APIHandlers) GetUserFollowers(c *gin.Context) {
 		return
 	}
 
-	response := []gin.H{}
-	for _, user := range users {
-		response = append(response, gin.H{
-			"userId":   user.ID.Int64,
-			"username": user.Username.String,
-			"nickname": user.Nickname.String,
-		})
-	}
-	c.JSON(http.StatusOK, response)
-}
-
-func (s *APIHandlers) GetUserFollowings(c *gin.Context) {
-	userID, parseErr := strconv.ParseInt(c.Param("userID"), 10, 64)
-	if parseErr != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": parseErr.Error(),
-		})
-		return
-	}
-
-	users, err := s.services.GetUserFollowings(userID)
+	followings, err := s.services.GetUserFollowings(userID)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -164,15 +115,28 @@ func (s *APIHandlers) GetUserFollowings(c *gin.Context) {
 		return
 	}
 
-	response := []gin.H{}
-	for _, user := range users {
-		response = append(response, gin.H{
+	followerRes := []gin.H{}
+	for _, user := range followers {
+		followerRes = append(followerRes, gin.H{
 			"userId":   user.ID.Int64,
 			"username": user.Username.String,
 			"nickname": user.Nickname.String,
 		})
 	}
-	c.JSON(http.StatusOK, response)
+
+	followingRes := []gin.H{}
+	for _, user := range followings {
+		followingRes = append(followingRes, gin.H{
+			"userId":   user.ID.Int64,
+			"username": user.Username.String,
+			"nickname": user.Nickname.String,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"followers":  followerRes,
+		"followings": followingRes,
+	})
 }
 
 func (s *APIHandlers) GetUserProfileByUsername(c *gin.Context) {
@@ -201,32 +165,6 @@ func (s *APIHandlers) GetUserProfileByUsername(c *gin.Context) {
 		return
 	}
 
-	// TODO: simplify the following code
-
-	followerCount, err := s.services.GetUserFollowerCount(userID)
-	if err != nil {
-		c.JSON(err.Code, gin.H{
-			"error": err.Message,
-		})
-		return
-	}
-
-	followingCount, err := s.services.GetUserFollowingCount(userID)
-	if err != nil {
-		c.JSON(err.Code, gin.H{
-			"error": err.Message,
-		})
-		return
-	}
-
-	postCount, err := s.services.GetUserPostCount(userID)
-	if err != nil {
-		c.JSON(err.Code, gin.H{
-			"error": err.Message,
-		})
-		return
-	}
-
 	// TODO: currently hard-coded to 0, see comment in GetUserRating
 	rating, err := s.services.GetUserRating(userID)
 	if err != nil {
@@ -238,20 +176,68 @@ func (s *APIHandlers) GetUserProfileByUsername(c *gin.Context) {
 
 	if c.Query("username") == "false" || c.Query("username") == "" {
 		c.JSON(http.StatusOK, gin.H{
-			"username":       user.Username.String,
-			"nickname":       user.Nickname.String,
-			"about":          user.About.String,
-			"createdAt":      user.CreatedAt.Time,
-			"followerCount":  followerCount,
-			"followingCount": followingCount,
-			"postCount":      postCount,
-			"rating":         rating,
+			"username":  user.Username.String,
+			"nickname":  user.Nickname.String,
+			"about":     user.About.String,
+			"createdAt": user.CreatedAt.Time,
+			"rating":    rating,
 		})
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "unknown query for username",
 		})
 	}
+}
+
+func (s *APIHandlers) GetUserRelationsByUsername(c *gin.Context) {
+	// TODO: refactor this and GetUserRelations
+	username := c.Param("username")
+	userID, err := s.services.GetUserIDByUsername(username)
+	if err != nil {
+		c.JSON(err.Code, gin.H{
+			"error": err.Message,
+		})
+		return
+	}
+
+	followers, err := s.services.GetUserFollowers(userID)
+	if err != nil {
+		c.JSON(err.Code, gin.H{
+			"error": err.Message,
+		})
+		return
+	}
+
+	followings, err := s.services.GetUserFollowings(userID)
+	if err != nil {
+		c.JSON(err.Code, gin.H{
+			"error": err.Message,
+		})
+		return
+	}
+
+	followerRes := []gin.H{}
+	for _, user := range followers {
+		followerRes = append(followerRes, gin.H{
+			"userId":   user.ID.Int64,
+			"username": user.Username.String,
+			"nickname": user.Nickname.String,
+		})
+	}
+
+	followingRes := []gin.H{}
+	for _, user := range followings {
+		followingRes = append(followingRes, gin.H{
+			"userId":   user.ID.Int64,
+			"username": user.Username.String,
+			"nickname": user.Nickname.String,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"followers":  followerRes,
+		"followings": followingRes,
+	})
 }
 
 func (s *APIHandlers) SearchPosts(c *gin.Context) {
