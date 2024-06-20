@@ -69,7 +69,20 @@ func (q *PostgresQueries) GetPostsWithOptions(options *models.SearchPostsOptions
 		}
 	}
 
-	// TODO: handle topics and tags list
+	if len(options.Authors) > 0 {
+		subsubquery := ""
+		for i, author := range options.Authors {
+			if i > 0 {
+				subsubquery += ","
+			}
+			subsubquery += "$" + strconv.Itoa(argsIndex)
+			queryArgs = append(queryArgs, author)
+			argsIndex++
+		}
+		whereQueries = append(whereQueries, "author_id IN (SELECT id FROM users WHERE username IN ("+subsubquery+"))")
+	}
+
+	// TODO: handle topics and tags list (must include both name and hub since names are not necessarily distinct)
 
 	var posts []models.Post
 	if err := q.selectAll(&posts, "posts", "*", strings.Join(whereQueries, " AND "), orderBy, queryArgs...); err != nil {

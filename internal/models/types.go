@@ -28,8 +28,9 @@ type SearchPostsOptions struct {
 	// all (default): compare query with both title and content.
 	MatchWith string `form:"match-with"`
 
-	Topics []string `form:"topics"`
-	Tags   []string `form:"tags"`
+	Authors []string `form:"authors"`
+	Topics  []string `form:"topics"`
+	Tags    []string `form:"tags"`
 
 	// deleted posts are not shown
 }
