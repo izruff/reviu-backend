@@ -28,16 +28,16 @@ func SetupRoutes(r *gin.Engine, s *APIServer) {
 	public := r.Group("/public")
 	{
 		users := public.Group("/users")
-		users.GET("/", s.handlers.SearchUsers)
+		users.GET("", s.handlers.SearchUsers)
 		user := users.Group("/id/:userID")
 		{
-			user.GET("/", s.handlers.GetUserProfile)
+			user.GET("", s.handlers.GetUserProfile)
 			user.GET("/relations", s.handlers.GetUserRelations)
 			// user.GET("/activity", s.handlers.GetUserActivity)
 		}
 		userByName := users.Group("/name/:username")
 		{
-			userByName.GET("/", s.handlers.GetUserProfileByUsername)
+			userByName.GET("", s.handlers.GetUserProfileByUsername)
 			userByName.GET("/relations", s.handlers.GetUserRelationsByUsername)
 			// userByName.GET("/activity", s.handlers.GetUserActivityByUsername)
 		}
@@ -53,15 +53,15 @@ func SetupRoutes(r *gin.Engine, s *APIServer) {
 		comments.GET("/id/:commentID/replies", s.handlers.GetRepliesToComment)
 
 		topics := public.Group("/topics")
-		topics.GET("/", s.handlers.SearchTopics)
+		topics.GET("", s.handlers.SearchTopics)
 		topic := topics.Group("/id/:topicID")
 		{
-			topic.GET("/", s.handlers.GetTopic)
+			topic.GET("", s.handlers.GetTopic)
 		}
 		// topics.GET("/id/:topicID", s.handlers.GetTopic)
 
 		tags := public.Group("/tags")
-		tags.GET("/", s.handlers.SearchTags)
+		tags.GET("", s.handlers.SearchTags)
 	}
 
 	authorized := r.Group("/authorized", s.handlers.JWTAuth)

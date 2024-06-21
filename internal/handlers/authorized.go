@@ -164,7 +164,7 @@ func (s *APIHandlers) CreatePost(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"postId": postID,
+		"id": postID,
 	})
 }
 
@@ -230,7 +230,7 @@ func (s *APIHandlers) ReplyToPost(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"commentId": commentID,
+		"id": commentID,
 	})
 }
 
@@ -299,7 +299,7 @@ func (s *APIHandlers) ReplyToComment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"commentId": commentID,
+		"id": commentID,
 	})
 }
 
@@ -357,6 +357,6 @@ func (s *APIHandlers) CreateTopic(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"topicID": topicID,
+		"id": topicID,
 	})
 }

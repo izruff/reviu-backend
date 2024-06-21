@@ -4,8 +4,8 @@ import "gopkg.in/guregu/null.v3"
 
 type User struct {
 	ID           null.Int    `db:"id" json:"id"`
-	Email        null.String `db:"email" json:"email"`
-	PasswordHash null.String `db:"password_hash" json:"passwordHash"`
+	Email        null.String `db:"email" json:"-"`
+	PasswordHash null.String `db:"password_hash" json:"-"`
 	ModRole      null.Bool   `db:"mod_role" json:"modRole"`
 	Username     null.String `db:"username" json:"username"`
 	Nickname     null.String `db:"nickname" json:"nickname"`
