@@ -11,4 +11,5 @@ type User struct {
 	Nickname     null.String `db:"nickname" json:"nickname"`
 	About        null.String `db:"about" json:"about"`
 	CreatedAt    null.Time   `db:"created_at" json:"createdAt"`
+	Rating       null.Int    `db:"rating" json:"rating"`
 }

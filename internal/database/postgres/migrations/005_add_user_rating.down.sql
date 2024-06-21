@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE users REMOVE COLUMN rating;
+
+COMMIT;
