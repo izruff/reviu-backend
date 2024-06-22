@@ -88,11 +88,15 @@ func (s *APIServices) MarkPostAsDeletedByID(id int64, reasonForDeletion string, 
 	return nil
 }
 
-func (s *APIServices) VotePost(id int64, userID int64, up bool) *SvcError {
-	// TODO: this logic is assuming there is no possibility for internal errors other than that when the vote does not exist
-	if err := s.queries.UpdateVote(up, id, userID); err != nil {
+func (s *APIServices) VotePost(id int64, userID int64, up null.Bool) *SvcError {
+	// TODO: this logic is assuming there is no possibility for other weird internal errors
+	if !up.Valid {
+		s.queries.DeleteVote(id, userID)
+		return nil
+	}
+	if err := s.queries.UpdateVote(up.Bool, id, userID); err != nil {
 		newVote := &models.Vote{
-			Up:     null.NewBool(up, true),
+			Up:     null.NewBool(up.Bool, true),
 			PostID: null.NewInt(id, true),
 			UserID: null.NewInt(userID, true),
 		}

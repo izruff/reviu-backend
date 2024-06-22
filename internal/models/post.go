@@ -14,4 +14,5 @@ type Post struct {
 	ReasonForDeletion null.String `db:"reason_for_deletion" json:"reasonForDeletion"`
 	ModeratorID       null.Int    `db:"moderator_id" json:"moderatorId"`
 	ViewCount         null.Int    `db:"view_count" json:"viewCount"`
+	VoteCount         null.Int    `db:"vote_count" json:"voteCount"`
 }

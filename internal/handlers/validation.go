@@ -48,8 +48,8 @@ type replyToPostJSON struct {
 }
 
 type votePostJSON struct {
-	Up     bool  `json:"up" binding:"required"`
-	PostID int64 `json:"postId" binding:"required"`
+	Up     null.Bool `json:"up"`
+	PostID int64     `json:"postId" binding:"required"`
 }
 
 type bookmarkPostJSON struct {
