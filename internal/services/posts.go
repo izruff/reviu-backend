@@ -68,7 +68,7 @@ func (s *APIServices) GetPostByID(id int64) (*models.Post, *SvcError) {
 }
 
 func (s *APIServices) GetPostInteractionsByUserID(id int64, userID int64) (*null.Bool, *SvcError) {
-	voted, err := s.queries.GetVoteValue(id, userID)
+	voted, err := s.queries.GetPostVoteValue(id, userID)
 	if err != nil {
 		return nil, newErrInternal(err)
 	}
@@ -100,16 +100,16 @@ func (s *APIServices) MarkPostAsDeletedByID(id int64, reasonForDeletion string, 
 func (s *APIServices) VotePost(id int64, userID int64, up null.Bool) *SvcError {
 	// TODO: this logic is assuming there is no possibility for other weird internal errors
 	if !up.Valid {
-		s.queries.DeleteVote(id, userID)
+		s.queries.DeletePostVote(id, userID)
 		return nil
 	}
-	if err := s.queries.UpdateVote(up.Bool, id, userID); err != nil {
-		newVote := &models.Vote{
+	if err := s.queries.UpdatePostVote(up.Bool, id, userID); err != nil {
+		newVote := &models.PostVote{
 			Up:     null.NewBool(up.Bool, true),
 			PostID: null.NewInt(id, true),
 			UserID: null.NewInt(userID, true),
 		}
-		if err := s.queries.CreateVote(newVote); err != nil {
+		if err := s.queries.CreatePostVote(newVote); err != nil {
 			return newErrInternal(err)
 		}
 	}
