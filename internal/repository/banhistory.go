@@ -16,7 +16,7 @@ func (q *PostgresQueries) CreateBanHistory(newBanHistory *models.BanHistory) err
 }
 
 func (q *PostgresQueries) GetBanHistoryFromUserID(userID int64) ([]models.BanHistory, error) {
-	var banHistory []models.BanHistory
+	banHistory := []models.BanHistory{}
 	if err := q.selectAll(&banHistory, "ban_history", "start_time", "user_id=$1", "", userID); err != nil {
 		return nil, err
 	}

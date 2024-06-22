@@ -144,7 +144,7 @@ func (s *APIServices) GetUserFollowers(id int64) ([]models.User, *SvcError) {
 		return nil, newErrInternal(err) // TODO: error handling when user does not exist
 	}
 
-	var users []models.User
+	users := []models.User{}
 	for _, relation := range followers {
 		user, err := s.GetUserByID(relation.FollowerID.Int64)
 		if err != nil {
@@ -171,7 +171,7 @@ func (s *APIServices) GetUserFollowings(id int64) ([]models.User, *SvcError) {
 		return nil, newErrInternal(err) // TODO: error handling when user does not exist
 	}
 
-	var users []models.User
+	users := []models.User{}
 	for _, relation := range followings {
 		user, err := s.GetUserByID(relation.FollowingID.Int64)
 		if err != nil {

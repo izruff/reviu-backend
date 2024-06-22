@@ -25,7 +25,7 @@ func (q *PostgresQueries) GetVoteValue(postID int64, userID int64) (*null.Bool, 
 }
 
 func (q *PostgresQueries) GetVotesFromPostID(postID int64) ([]models.Vote, error) {
-	var votes []models.Vote
+	votes := []models.Vote{}
 	if err := q.selectAll(&votes, "votes", "post_id", "WHERE post_id=:post_id", "", postID); err != nil {
 		return nil, err
 	}

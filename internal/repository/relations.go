@@ -12,7 +12,7 @@ func (q *PostgresQueries) CreateRelation(newRelation *models.Relation) error {
 }
 
 func (q *PostgresQueries) GetFollowersFromUserID(userID int64) ([]models.Relation, error) {
-	var relations []models.Relation
+	relations := []models.Relation{}
 	if err := q.selectAll(&relations, "relations", "follower_id", "following_id=$1", "", userID); err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func (q *PostgresQueries) CountFollowersFromUserID(userID int64) (int64, error) 
 }
 
 func (q *PostgresQueries) GetFollowingsFromUserID(userID int64) ([]models.Relation, error) {
-	var relations []models.Relation
+	relations := []models.Relation{}
 	if err := q.selectAll(&relations, "relations", "following_id", "follower_id=$1", "", userID); err != nil {
 		return nil, err
 	}

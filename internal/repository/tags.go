@@ -61,7 +61,7 @@ func (q *PostgresQueries) GetTagsWithOptions(options *models.SearchTagsOptions) 
 		return nil, errors.New("unexpected error: invalid option for must-match")
 	}
 
-	var tags []models.Tag
+	tags := []models.Tag{}
 	if err := q.selectAll(&tags, "tags", "*", whereQuery, orderBy, queryArgs...); err != nil {
 		return nil, err
 	}

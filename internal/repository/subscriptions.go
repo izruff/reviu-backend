@@ -12,7 +12,7 @@ func (q *PostgresQueries) CreateSubscription(newSubscription *models.Subscriptio
 }
 
 func (q *PostgresQueries) GetSubscribersFromTopicID(topicID int64) ([]models.Subscription, error) {
-	var subscriptions []models.Subscription
+	subscriptions := []models.Subscription{}
 	if err := q.selectAll(&subscriptions, "subscriptions", "user_id", "topic_id=$1", "", topicID); err != nil {
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func (q *PostgresQueries) CountSubscribersFromTopicID(topicID int64) (int64, err
 }
 
 func (q *PostgresQueries) GetSubscribedTopicsFromUserID(userID int64) ([]models.Subscription, error) {
-	var subscriptions []models.Subscription
+	subscriptions := []models.Subscription{}
 	if err := q.selectAll(&subscriptions, "subscriptions", "topic_id", "user_id=$1", "", userID); err != nil {
 		return nil, err
 	}

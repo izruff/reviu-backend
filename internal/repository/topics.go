@@ -70,7 +70,7 @@ func (q *PostgresQueries) GetTopicsWithOptions(options *models.SearchTopicsOptio
 		return nil, errors.New("unexpected error: invalid option for must-match")
 	}
 
-	var topics []models.Topic
+	topics := []models.Topic{}
 	if err := q.selectAll(&topics, "topics", "*", whereQuery, orderBy, queryArgs...); err != nil {
 		return nil, err
 	}

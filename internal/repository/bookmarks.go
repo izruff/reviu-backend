@@ -12,7 +12,7 @@ func (q *PostgresQueries) CreateBookmark(newBookmark *models.Bookmark) error {
 }
 
 func (q *PostgresQueries) GetBookmarksFromUserID(userID int64) ([]models.Bookmark, error) {
-	var bookmarks []models.Bookmark
+	bookmarks := []models.Bookmark{}
 	if err := q.selectAll(&bookmarks, "bookmarks", "post_id", "user_id=$1", "", userID); err != nil {
 		return nil, err
 	}

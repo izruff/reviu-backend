@@ -67,7 +67,7 @@ func (q *PostgresQueries) GetCommentsWithOptions(options *models.SearchCommentsO
 		return nil, errors.New("unexpected error: invalid option for sort-by")
 	}
 
-	var comments []models.Comment
+	comments := []models.Comment{}
 	if err := q.selectAll(&comments, "comments", "*", strings.Join(whereQueries, " AND "), orderBy, queryArgs...); err != nil {
 		return nil, err
 	}

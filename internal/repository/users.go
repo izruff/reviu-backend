@@ -79,7 +79,7 @@ func (q *PostgresQueries) GetUsersWithOptions(options *models.SearchUsersOptions
 		return nil, errors.New("unexpected error: invalid option for must-match")
 	}
 
-	var users []models.User
+	users := []models.User{}
 	if err := q.selectAll(&users, "users", "*", whereQuery, orderBy, queryArgs...); err != nil {
 		return nil, err
 	}

@@ -84,7 +84,7 @@ func (q *PostgresQueries) GetPostsWithOptions(options *models.SearchPostsOptions
 
 	// TODO: handle topics and tags list (must include both name and hub since names are not necessarily distinct)
 
-	var posts []models.Post
+	posts := []models.Post{}
 	if err := q.selectAll(&posts, "posts", "*", strings.Join(whereQueries, " AND "), orderBy, queryArgs...); err != nil {
 		return nil, err
 	}
