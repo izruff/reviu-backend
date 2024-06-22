@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/izruff/reviu-backend/internal/models"
@@ -166,6 +167,32 @@ func (s *APIHandlers) CreatePost(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"id": postID,
 	})
+}
+
+func (s *APIHandlers) GetPostInteractions(c *gin.Context) {
+	value, _ := c.Get("userID")
+	userID := value.(int64)
+
+	postID, parseErr := strconv.ParseInt(c.Param("postID"), 10, 64)
+	if parseErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": parseErr.Error(),
+		})
+		return
+	}
+
+	voted, err := s.services.GetPostInteractionsByUserID(postID, userID)
+	if err != nil {
+		c.JSON(err.Code, gin.H{
+			"error": err.Message,
+		})
+		return
+	}
+
+	postInteractions := &postInteractionsResponse{
+		Voted: voted,
+	}
+	c.JSON(http.StatusOK, postInteractions)
 }
 
 func (s *APIHandlers) EditPost(c *gin.Context) {

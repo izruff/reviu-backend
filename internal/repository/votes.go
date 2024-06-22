@@ -14,6 +14,16 @@ func (q *PostgresQueries) CreateVote(newVote *models.Vote) error {
 	return nil
 }
 
+func (q *PostgresQueries) GetVoteValue(postID int64, userID int64) (*null.Bool, error) {
+	var vote models.Vote
+	if err := q.selectOne(&vote, "votes", "up", "post_id=$1 AND user_id=$2", postID, userID); err != nil {
+		voted := null.NewBool(false, false)
+		return &voted, nil // TODO: error handling for other internal errors
+	}
+
+	return &vote.Up, nil
+}
+
 func (q *PostgresQueries) GetVotesFromPostID(postID int64) ([]models.Vote, error) {
 	var votes []models.Vote
 	if err := q.selectAll(&votes, "votes", "post_id", "WHERE post_id=:post_id", "", postID); err != nil {

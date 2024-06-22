@@ -67,6 +67,15 @@ func (s *APIServices) GetPostByID(id int64) (*models.Post, *SvcError) {
 	return post, nil
 }
 
+func (s *APIServices) GetPostInteractionsByUserID(id int64, userID int64) (*null.Bool, *SvcError) {
+	voted, err := s.queries.GetVoteValue(id, userID)
+	if err != nil {
+		return nil, newErrInternal(err)
+	}
+
+	return voted, nil
+}
+
 func (s *APIServices) UpdatePostByID(id int64, updatedPost *models.Post) *SvcError {
 	// TODO: error handling when there are no changes
 	updatedPost.ID.Int64 = id

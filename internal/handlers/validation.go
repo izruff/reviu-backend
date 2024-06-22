@@ -70,3 +70,7 @@ type createTopicJSON struct {
 	Topic string `json:"topic" binding:"required"`
 	Hub   string `json:"hub" binding:"required"`
 }
+
+type postInteractionsResponse struct {
+	Voted *null.Bool `json:"voted"`
+}

@@ -78,6 +78,7 @@ func SetupRoutes(r *gin.Engine, s *APIServer) {
 		posts.POST("/create", s.handlers.CreatePost)
 		post := posts.Group("/id/:postID")
 		{
+			post.GET("", s.handlers.GetPostInteractions)
 			post.PATCH("/edit", s.handlers.EditPost)
 			post.POST("/reply", s.handlers.ReplyToPost)
 			post.POST("/vote", s.handlers.VotePost)
