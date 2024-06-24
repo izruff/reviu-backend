@@ -181,7 +181,7 @@ func (s *APIHandlers) GetPostInteractions(c *gin.Context) {
 		return
 	}
 
-	voted, err := s.services.GetPostInteractionsByUserID(postID, userID)
+	viewed, voted, err := s.services.GetPostInteractionsByUserID(postID, userID)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -190,9 +190,32 @@ func (s *APIHandlers) GetPostInteractions(c *gin.Context) {
 	}
 
 	postInteractions := &postInteractionsResponse{
-		Voted: voted,
+		Viewed: viewed,
+		Voted:  voted,
 	}
 	c.JSON(http.StatusOK, postInteractions)
+}
+
+func (s *APIHandlers) ViewPost(c *gin.Context) {
+	value, _ := c.Get("userID")
+	userID := value.(int64)
+
+	postID, parseErr := strconv.ParseInt(c.Param("postID"), 10, 64)
+	if parseErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": parseErr.Error(),
+		})
+		return
+	}
+
+	if err := s.services.ViewPost(postID, userID); err != nil {
+		c.JSON(err.Code, gin.H{
+			"error": err.Message, // TODO: error handling when the post was already viewed
+		})
+		return
+	}
+
+	c.Status(http.StatusCreated)
 }
 
 func (s *APIHandlers) EditPost(c *gin.Context) {

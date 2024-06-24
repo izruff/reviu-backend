@@ -67,13 +67,18 @@ func (s *APIServices) GetPostByID(id int64) (*models.Post, *SvcError) {
 	return post, nil
 }
 
-func (s *APIServices) GetPostInteractionsByUserID(id int64, userID int64) (*null.Bool, *SvcError) {
-	voted, err := s.queries.GetPostVoteValue(id, userID)
+func (s *APIServices) GetPostInteractionsByUserID(id int64, userID int64) (bool, *null.Bool, *SvcError) {
+	viewed, err := s.queries.GetPostViewValue(id, userID)
 	if err != nil {
-		return nil, newErrInternal(err)
+		return false, nil, newErrInternal(err)
 	}
 
-	return voted, nil
+	voted, err := s.queries.GetPostVoteValue(id, userID)
+	if err != nil {
+		return false, nil, newErrInternal(err)
+	}
+
+	return viewed, voted, nil
 }
 
 func (s *APIServices) UpdatePostByID(id int64, updatedPost *models.Post) *SvcError {
@@ -92,6 +97,19 @@ func (s *APIServices) MarkPostAsDeletedByID(id int64, reasonForDeletion string, 
 	if err := s.queries.MarkPostAsDeletedByID(id, reasonForDeletion, moderatorID); err != nil {
 		// TODO: error handling when post does not exist
 		return newErrInternal(err)
+	}
+
+	return nil
+}
+
+func (s *APIServices) ViewPost(id int64, userID int64) *SvcError {
+	newView := &models.PostView{
+		PostID: null.NewInt(id, true),
+		UserID: null.NewInt(userID, true),
+	}
+
+	if err := s.queries.CreatePostView(newView); err != nil {
+		return newErrInternal(err) // TODO: error handling when post view already exists
 	}
 
 	return nil

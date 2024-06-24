@@ -72,5 +72,6 @@ type createTopicJSON struct {
 }
 
 type postInteractionsResponse struct {
-	Voted *null.Bool `json:"voted"`
+	Viewed bool       `json:"viewed"`
+	Voted  *null.Bool `json:"voted"`
 }
