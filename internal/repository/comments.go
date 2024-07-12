@@ -59,6 +59,8 @@ func (q *PostgresQueries) GetCommentsWithOptions(options *models.SearchCommentsO
 		orderBy = "content <->>> $" + strconv.Itoa(argsIndex)
 		queryArgs = append(queryArgs, options.Query)
 		argsIndex++
+	} else if options.SortBy == "popularity" {
+		orderBy = "vote_count DESC, created_at DESC" // TODO: might implement a more complex popularity sorting
 	} else if options.SortBy == "age-asc" || options.SortBy == "" {
 		orderBy = "created_at DESC"
 	} else if options.SortBy == "age-desc" {

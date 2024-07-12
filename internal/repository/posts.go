@@ -46,7 +46,7 @@ func (q *PostgresQueries) GetPostsWithOptions(options *models.SearchPostsOptions
 			argsIndex += 2
 		}
 	} else if options.SortBy == "popularity" {
-		orderBy = "" // TODO
+		orderBy = "vote_count DESC, created_at DESC" // TODO: might implement a more complex popularity sorting
 	} else if options.SortBy == "age-asc" || options.SortBy == "" {
 		orderBy = "created_at DESC"
 	} else if options.SortBy == "age-desc" {

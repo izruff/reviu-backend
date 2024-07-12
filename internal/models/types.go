@@ -19,7 +19,7 @@ type SearchPostsOptions struct {
 	Query string `form:"q"`
 
 	// similarity: sort by the similarity of word composition, using pg_trgm extension.
-	// popularity: sort roughly by view, comment, or vote counts.
+	// popularity: sort roughly by time created, view, vote, and comment count.
 	// age-asc (default): sort from the newest post.
 	// age-desc: sort from the oldest post.
 	SortBy string `form:"sort-by"`
@@ -41,6 +41,7 @@ type SearchCommentsOptions struct {
 	Query           string `form:"q"`
 
 	// similarity: sort by the similarity of word composition, using pg_trgm extension.
+	// popularity: sort roughly by time created, vote, and comment count.
 	// age-asc (default): sort from the newest post.
 	// age-desc: sort from the oldest post.
 	SortBy string `form:"sort-by"`
