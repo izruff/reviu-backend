@@ -353,6 +353,28 @@ func (s *APIHandlers) ReplyToComment(c *gin.Context) {
 	})
 }
 
+func (s *APIHandlers) VoteComment(c *gin.Context) {
+	value, _ := c.Get("userID")
+	userID := value.(int64)
+
+	var json voteCommentJSON
+	if err := c.ShouldBindJSON(&json); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if err := s.services.VoteComment(json.CommentID, userID, json.Up); err != nil {
+		c.JSON(err.Code, gin.H{
+			"error": err.Message,
+		})
+		return
+	}
+
+	c.Status(http.StatusCreated)
+}
+
 func (s *APIHandlers) EditComment(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)

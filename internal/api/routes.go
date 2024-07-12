@@ -90,6 +90,7 @@ func SetupRoutes(r *gin.Engine, s *APIServer) {
 		comment := comments.Group("/id/:commentID")
 		{
 			comment.POST("/reply", s.handlers.ReplyToComment)
+			comment.POST("/vote", s.handlers.VoteComment)
 			comment.PATCH("/edit", s.handlers.EditComment)
 		}
 

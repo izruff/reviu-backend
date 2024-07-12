@@ -66,6 +66,26 @@ func (s *APIServices) MarkCommentAsDeletedByID(commentID int64, postID int64, re
 	return nil
 }
 
+func (s *APIServices) VoteComment(id int64, userID int64, up null.Bool) *SvcError {
+	// TODO: this logic is assuming there is no possibility for other weird internal errors
+	if !up.Valid {
+		s.queries.DeleteCommentVote(id, userID)
+		return nil
+	}
+	if err := s.queries.UpdateCommentVote(up.Bool, id, userID); err != nil {
+		newVote := &models.CommentVote{
+			Up:        null.NewBool(up.Bool, true),
+			CommentID: null.NewInt(id, true),
+			UserID:    null.NewInt(userID, true),
+		}
+		if err := s.queries.CreateCommentVote(newVote); err != nil {
+			return newErrInternal(err)
+		}
+	}
+
+	return nil
+}
+
 func (s *APIServices) SearchComments(options *models.SearchCommentsOptions) ([]models.Comment, *SvcError) {
 	comments, err := s.queries.GetCommentsWithOptions(options)
 	if err != nil {

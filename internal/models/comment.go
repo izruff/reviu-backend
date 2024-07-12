@@ -13,4 +13,5 @@ type Comment struct {
 	DeletedAt         null.Time   `db:"deleted_at" json:"deletedAt"`
 	ReasonForDeletion null.String `db:"reason_for_deletion" json:"reasonForDeletion"`
 	ModeratorID       null.Int    `db:"moderator_id" json:"moderatorId"`
+	VoteCount         null.Int    `db:"vote_count" json:"voteCount"`
 }

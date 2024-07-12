@@ -61,6 +61,11 @@ type replyToCommentJSON struct {
 	ParentCommentID int64  `json:"parentCommentID" binding:"required"`
 }
 
+type voteCommentJSON struct {
+	Up        null.Bool `json:"up"`
+	CommentID int64     `json:"commentId" binding:"required"`
+}
+
 type editCommentJSON struct {
 	CommentID int64  `json:"commentId" binding:"required"`
 	Content   string `json:"content" binding:"required"`
