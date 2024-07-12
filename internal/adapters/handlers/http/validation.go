@@ -1,4 +1,4 @@
-package handlers
+package http
 
 import "gopkg.in/guregu/null.v3"
 

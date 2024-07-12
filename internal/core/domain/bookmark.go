@@ -1,4 +1,4 @@
-package models
+package domain
 
 import "gopkg.in/guregu/null.v3"
 
