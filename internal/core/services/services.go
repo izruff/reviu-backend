@@ -3,7 +3,19 @@ package services
 import (
 	"net/http"
 	"strings"
+
+	"github.com/izruff/reviu-backend/internal/core/ports"
 )
+
+type APIServices struct {
+	repo ports.Repository
+}
+
+func NewAPIServices(repo ports.Repository) *APIServices {
+	return &APIServices{
+		repo: repo,
+	}
+}
 
 type SvcError struct {
 	Code    int
