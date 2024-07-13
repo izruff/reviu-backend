@@ -17,10 +17,7 @@ func NewAPIServices(repo ports.Repository) *APIServices {
 	}
 }
 
-type SvcError struct {
-	Code    int
-	Message string
-}
+type SvcError = ports.SvcError
 
 // Internal server error; for any unexpected error that is not categorized here
 func newErrInternal(err error) *SvcError {
