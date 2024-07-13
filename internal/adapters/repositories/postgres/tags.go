@@ -4,11 +4,11 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/izruff/reviu-backend/internal/models"
+	"github.com/izruff/reviu-backend/internal/core/domain"
 )
 
-func (q *PostgresQueries) CreateTag(newTag *models.Tag) (int64, error) {
-	tagID, err := q.create("tags", []string{"tag", "hub"}, true, newTag)
+func (r *PostgresRepository) CreateTag(newTag *domain.Tag) (int64, error) {
+	tagID, err := r.create("tags", []string{"tag", "hub"}, true, newTag)
 	// TODO: error handling when form is incomplete or hub does not exist
 	if err != nil {
 		return 0, err
@@ -17,16 +17,16 @@ func (q *PostgresQueries) CreateTag(newTag *models.Tag) (int64, error) {
 	return tagID, nil
 }
 
-func (q *PostgresQueries) GetTagByID(id int64) (*models.Tag, error) {
-	tag := &models.Tag{}
-	if err := q.selectOne(tag, "tags", "*", "id=$1", id); err != nil {
+func (r *PostgresRepository) GetTagByID(id int64) (*domain.Tag, error) {
+	tag := &domain.Tag{}
+	if err := r.selectOne(tag, "tags", "*", "id=$1", id); err != nil {
 		return nil, err // TODO: error handling when tag does not exist
 	}
 
 	return tag, nil
 }
 
-func (q *PostgresQueries) GetTagsWithOptions(options *models.SearchTagsOptions) ([]models.Tag, error) {
+func (r *PostgresRepository) GetTagsWithOptions(options *domain.SearchTagsOptions) ([]domain.Tag, error) {
 	var whereQuery, orderBy string
 	var queryArgs []interface{}
 	argsIndex := 1
@@ -61,8 +61,8 @@ func (q *PostgresQueries) GetTagsWithOptions(options *models.SearchTagsOptions) 
 		return nil, errors.New("unexpected error: invalid option for must-match")
 	}
 
-	tags := []models.Tag{}
-	if err := q.selectAll(&tags, "tags", "*", whereQuery, orderBy, queryArgs...); err != nil {
+	tags := []domain.Tag{}
+	if err := r.selectAll(&tags, "tags", "*", whereQuery, orderBy, queryArgs...); err != nil {
 		return nil, err
 	}
 

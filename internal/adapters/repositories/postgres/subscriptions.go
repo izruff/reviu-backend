@@ -1,27 +1,27 @@
 package postgres
 
-import "github.com/izruff/reviu-backend/internal/models"
+import "github.com/izruff/reviu-backend/internal/core/domain"
 
-func (q *PostgresQueries) CreateSubscription(newSubscription *models.Subscription) error {
+func (r *PostgresRepository) CreateSubscription(newSubscription *domain.Subscription) error {
 	// TODO: error handling when form is incomplete or already exists
-	if _, err := q.create("subscriptions", []string{"topic_id", "user_id"}, false, newSubscription); err != nil {
+	if _, err := r.create("subscriptions", []string{"topic_id", "user_id"}, false, newSubscription); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (q *PostgresQueries) GetSubscribersFromTopicID(topicID int64) ([]models.Subscription, error) {
-	subscriptions := []models.Subscription{}
-	if err := q.selectAll(&subscriptions, "subscriptions", "user_id", "topic_id=$1", "", topicID); err != nil {
+func (r *PostgresRepository) GetSubscribersFromTopicID(topicID int64) ([]domain.Subscription, error) {
+	subscriptions := []domain.Subscription{}
+	if err := r.selectAll(&subscriptions, "subscriptions", "user_id", "topic_id=$1", "", topicID); err != nil {
 		return nil, err
 	}
 
 	return subscriptions, nil
 }
 
-func (q *PostgresQueries) CountSubscribersFromTopicID(topicID int64) (int64, error) {
-	count, err := q.count("subscriptions", "user_id", "topic_id=$1", topicID)
+func (r *PostgresRepository) CountSubscribersFromTopicID(topicID int64) (int64, error) {
+	count, err := r.count("subscriptions", "user_id", "topic_id=$1", topicID)
 	if err != nil {
 		return 0, err
 	}
@@ -29,17 +29,17 @@ func (q *PostgresQueries) CountSubscribersFromTopicID(topicID int64) (int64, err
 	return count, nil
 }
 
-func (q *PostgresQueries) GetSubscribedTopicsFromUserID(userID int64) ([]models.Subscription, error) {
-	subscriptions := []models.Subscription{}
-	if err := q.selectAll(&subscriptions, "subscriptions", "topic_id", "user_id=$1", "", userID); err != nil {
+func (r *PostgresRepository) GetSubscribedTopicsFromUserID(userID int64) ([]domain.Subscription, error) {
+	subscriptions := []domain.Subscription{}
+	if err := r.selectAll(&subscriptions, "subscriptions", "topic_id", "user_id=$1", "", userID); err != nil {
 		return nil, err
 	}
 
 	return subscriptions, nil
 }
 
-func (q *PostgresQueries) CountSubscribedTopicsFromUserID(userID int64) (int64, error) {
-	count, err := q.count("subscriptions", "topic_id", "user_id=$1", userID)
+func (r *PostgresRepository) CountSubscribedTopicsFromUserID(userID int64) (int64, error) {
+	count, err := r.count("subscriptions", "topic_id", "user_id=$1", userID)
 	if err != nil {
 		return 0, err
 	}
@@ -47,8 +47,8 @@ func (q *PostgresQueries) CountSubscribedTopicsFromUserID(userID int64) (int64, 
 	return count, nil
 }
 
-func (q *PostgresQueries) DeleteSubscription(topicID int64, userID int64) error {
-	if err := q.deleteWhere("subscriptions", true, "topic_id=$1 AND user_id=$2", topicID, userID); err != nil {
+func (r *PostgresRepository) DeleteSubscription(topicID int64, userID int64) error {
+	if err := r.deleteWhere("subscriptions", true, "topic_id=$1 AND user_id=$2", topicID, userID); err != nil {
 		return err // TODO: error handling when subscription does not exist
 	}
 

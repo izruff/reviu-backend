@@ -6,13 +6,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/izruff/reviu-backend/internal/models"
+	"github.com/izruff/reviu-backend/internal/core/domain"
 	"gopkg.in/guregu/null.v3"
 )
 
-func (q *PostgresQueries) CreateComment(newComment *models.Comment) (int64, error) {
+func (r *PostgresRepository) CreateComment(newComment *domain.Comment) (int64, error) {
 	// TODO: error handling when form is incomplete
-	postID, err := q.create("comments", []string{"content", "author_id", "post_id", "parent_comment_id"}, true, newComment)
+	postID, err := r.create("comments", []string{"content", "author_id", "post_id", "parent_comment_id"}, true, newComment)
 	if err != nil {
 		return 0, err
 	}
@@ -20,16 +20,16 @@ func (q *PostgresQueries) CreateComment(newComment *models.Comment) (int64, erro
 	return postID, nil
 }
 
-func (q *PostgresQueries) GetCommentByID(id int64) (*models.Comment, error) {
-	comment := &models.Comment{}
-	if err := q.selectOne(comment, "comments", "*", "id=$1", id); err != nil {
+func (r *PostgresRepository) GetCommentByID(id int64) (*domain.Comment, error) {
+	comment := &domain.Comment{}
+	if err := r.selectOne(comment, "comments", "*", "id=$1", id); err != nil {
 		return nil, err // TODO: error handling when comment does not exist
 	}
 
 	return comment, nil
 }
 
-func (q *PostgresQueries) GetCommentsWithOptions(options *models.SearchCommentsOptions) ([]models.Comment, error) {
+func (r *PostgresRepository) GetCommentsWithOptions(options *domain.SearchCommentsOptions) ([]domain.Comment, error) {
 	// TODO: error handling when post does not exist
 	var whereQueries []string
 	var orderBy string
@@ -69,15 +69,15 @@ func (q *PostgresQueries) GetCommentsWithOptions(options *models.SearchCommentsO
 		return nil, errors.New("unexpected error: invalid option for sort-by")
 	}
 
-	comments := []models.Comment{}
-	if err := q.selectAll(&comments, "comments", "*", strings.Join(whereQueries, " AND "), orderBy, queryArgs...); err != nil {
+	comments := []domain.Comment{}
+	if err := r.selectAll(&comments, "comments", "*", strings.Join(whereQueries, " AND "), orderBy, queryArgs...); err != nil {
 		return nil, err
 	}
 
 	return comments, nil
 }
 
-func (q *PostgresQueries) UpdateCommentByID(updatedComment *models.Comment) error {
+func (r *PostgresRepository) UpdateCommentByID(updatedComment *domain.Comment) error {
 	if !updatedComment.ID.Valid {
 		return errors.New("ID not provided")
 	}
@@ -91,21 +91,21 @@ func (q *PostgresQueries) UpdateCommentByID(updatedComment *models.Comment) erro
 	updatedComment.UpdatedAt = null.NewTime(time.Now(), true)
 	columns = append(columns, "updated_at")
 
-	if err := q.updateByID("comments", columns, updatedComment); err != nil {
+	if err := r.updateByID("comments", columns, updatedComment); err != nil {
 		return err // TODO: error handling when comment does not exist
 	}
 
 	return nil
 }
 
-func (q *PostgresQueries) MarkCommentAsDeletedByID(id int64, reason string, moderatorID int64) error {
-	updatedComment := &models.Comment{
+func (r *PostgresRepository) MarkCommentAsDeletedByID(id int64, reason string, moderatorID int64) error {
+	updatedComment := &domain.Comment{
 		ID:                null.NewInt(id, true),
 		ReasonForDeletion: null.NewString(reason, true),
 		ModeratorID:       null.NewInt(moderatorID, true),
 		DeletedAt:         null.NewTime(time.Now(), true),
 	}
-	if err := q.updateByID("comments", []string{"reason_for_deletion", "moderator_id", "deleted_at"}, updatedComment); err != nil {
+	if err := r.updateByID("comments", []string{"reason_for_deletion", "moderator_id", "deleted_at"}, updatedComment); err != nil {
 		return err // TODO: error handling when comment does not exist
 	}
 

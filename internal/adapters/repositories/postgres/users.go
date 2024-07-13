@@ -4,11 +4,11 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/izruff/reviu-backend/internal/models"
+	"github.com/izruff/reviu-backend/internal/core/domain"
 )
 
-func (q *PostgresQueries) CreateUser(newUser *models.User) (int64, error) {
-	userID, err := q.create("users", []string{"email", "password_hash", "mod_role", "username"}, true, newUser)
+func (r *PostgresRepository) CreateUser(newUser *domain.User) (int64, error) {
+	userID, err := r.create("users", []string{"email", "password_hash", "mod_role", "username"}, true, newUser)
 	// TODO: error handling when form is incomplete or user already exist
 	if err != nil {
 		return 0, err
@@ -17,34 +17,34 @@ func (q *PostgresQueries) CreateUser(newUser *models.User) (int64, error) {
 	return userID, nil
 }
 
-func (q *PostgresQueries) GetUserByID(id int64) (*models.User, error) {
-	user := &models.User{}
-	if err := q.selectOne(user, "users", "*", "id=$1", id); err != nil {
+func (r *PostgresRepository) GetUserByID(id int64) (*domain.User, error) {
+	user := &domain.User{}
+	if err := r.selectOne(user, "users", "*", "id=$1", id); err != nil {
 		return nil, err // TODO: error handling when user does not exist
 	}
 
 	return user, nil
 }
 
-func (q *PostgresQueries) GetUserIDByEmail(email string) (int64, error) {
+func (r *PostgresRepository) GetUserIDByEmail(email string) (int64, error) {
 	var userID int64
-	if err := q.selectOne(&userID, "users", "id", "email=$1", email); err != nil {
+	if err := r.selectOne(&userID, "users", "id", "email=$1", email); err != nil {
 		return 0, err // TODO: error handling when user does not exist
 	}
 
 	return userID, nil
 }
 
-func (q *PostgresQueries) GetUserIDByUsername(username string) (int64, error) {
+func (r *PostgresRepository) GetUserIDByUsername(username string) (int64, error) {
 	var userID int64
-	if err := q.selectOne(&userID, "users", "id", "username=$1", username); err != nil {
+	if err := r.selectOne(&userID, "users", "id", "username=$1", username); err != nil {
 		return 0, err // TODO: error handling when user does not exist
 	}
 
 	return userID, nil
 }
 
-func (q *PostgresQueries) GetUsersWithOptions(options *models.SearchUsersOptions) ([]models.User, error) {
+func (r *PostgresRepository) GetUsersWithOptions(options *domain.SearchUsersOptions) ([]domain.User, error) {
 	var whereQuery, orderBy string
 	var queryArgs []interface{}
 	argsIndex := 1
@@ -79,15 +79,15 @@ func (q *PostgresQueries) GetUsersWithOptions(options *models.SearchUsersOptions
 		return nil, errors.New("unexpected error: invalid option for must-match")
 	}
 
-	users := []models.User{}
-	if err := q.selectAll(&users, "users", "*", whereQuery, orderBy, queryArgs...); err != nil {
+	users := []domain.User{}
+	if err := r.selectAll(&users, "users", "*", whereQuery, orderBy, queryArgs...); err != nil {
 		return nil, err
 	}
 
 	return users, nil
 }
 
-func (q *PostgresQueries) UpdateUserByID(updatedUser *models.User) error {
+func (r *PostgresRepository) UpdateUserByID(updatedUser *domain.User) error {
 	if !updatedUser.ID.Valid {
 		return errors.New("ID not provided")
 	}
@@ -113,7 +113,7 @@ func (q *PostgresQueries) UpdateUserByID(updatedUser *models.User) error {
 	}
 	// TODO: error handling if nothing is updated
 
-	if err := q.updateByID("users", columns, updatedUser); err != nil {
+	if err := r.updateByID("users", columns, updatedUser); err != nil {
 		return err // TODO: error handling when user does not exist
 	}
 
@@ -121,8 +121,8 @@ func (q *PostgresQueries) UpdateUserByID(updatedUser *models.User) error {
 }
 
 // TODO: not sure if this is possible when user has already posted
-func (q *PostgresQueries) DeleteUserByID(id int64) error {
-	if err := q.deleteByID("users", id); err != nil {
+func (r *PostgresRepository) DeleteUserByID(id int64) error {
+	if err := r.deleteByID("users", id); err != nil {
 		return err // TODO: error handling when user does not exist
 	}
 

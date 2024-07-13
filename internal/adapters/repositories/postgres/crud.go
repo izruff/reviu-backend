@@ -5,14 +5,14 @@ import (
 	"strings"
 )
 
-func (q *PostgresQueries) create(table string, columns []string, returningID bool, modelInstance interface{}) (int64, error) {
+func (r *PostgresRepository) create(table string, columns []string, returningID bool, modelInstance interface{}) (int64, error) {
 	query := "INSERT INTO " + table + " (" + strings.Join(columns, ",") + ") VALUES (:" + strings.Join(columns, ",:") + ")"
 	if returningID {
 		query += " RETURNING id"
 	}
 
 	if returningID {
-		rows, err := q.db.NamedQuery(query, modelInstance)
+		rows, err := r.db.NamedQuery(query, modelInstance)
 		if err != nil {
 			return 0, err
 		}
@@ -28,7 +28,7 @@ func (q *PostgresQueries) create(table string, columns []string, returningID boo
 		return dest.ID, nil
 	}
 
-	_, err := q.db.NamedExec(query, modelInstance)
+	_, err := r.db.NamedExec(query, modelInstance)
 	if err != nil {
 		return 0, err
 	}
@@ -36,7 +36,7 @@ func (q *PostgresQueries) create(table string, columns []string, returningID boo
 	return 0, nil
 }
 
-func (q *PostgresQueries) selectAll(dest interface{}, table string, column string, whereQuery string, orderBy string, queryArgs ...interface{}) error {
+func (r *PostgresRepository) selectAll(dest interface{}, table string, column string, whereQuery string, orderBy string, queryArgs ...interface{}) error {
 	query := "SELECT " + column + " FROM " + table
 	if whereQuery != "" {
 		query += " WHERE " + whereQuery
@@ -45,41 +45,41 @@ func (q *PostgresQueries) selectAll(dest interface{}, table string, column strin
 		query += " ORDER BY " + orderBy
 	}
 
-	if err := q.db.Select(dest, query, queryArgs...); err != nil {
+	if err := r.db.Select(dest, query, queryArgs...); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (q *PostgresQueries) selectOne(dest interface{}, table string, column string, whereQuery string, whereArgs ...interface{}) error {
+func (r *PostgresRepository) selectOne(dest interface{}, table string, column string, whereQuery string, whereArgs ...interface{}) error {
 	query := "SELECT " + column + " FROM " + table
 	if whereQuery != "" {
 		query += " WHERE " + whereQuery
 	}
 
-	if err := q.db.Get(dest, query, whereArgs...); err != nil {
+	if err := r.db.Get(dest, query, whereArgs...); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (q *PostgresQueries) updateByID(table string, columns []string, modelInstance interface{}) error {
+func (r *PostgresRepository) updateByID(table string, columns []string, modelInstance interface{}) error {
 	var setSlice []string
 	for _, col := range columns {
 		setSlice = append(setSlice, col+"=:"+col)
 	}
 	query := "UPDATE " + table + " SET " + strings.Join(setSlice, ",") + " WHERE id=:id"
 
-	if _, err := q.db.NamedExec(query, modelInstance); err != nil {
+	if _, err := r.db.NamedExec(query, modelInstance); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (q *PostgresQueries) updateByPK(table string, columns []string, pkColumns []string, modelInstance interface{}) error {
+func (r *PostgresRepository) updateByPK(table string, columns []string, pkColumns []string, modelInstance interface{}) error {
 	var setSlice []string
 	for _, col := range columns {
 		setSlice = append(setSlice, col+"=:"+col)
@@ -90,7 +90,7 @@ func (q *PostgresQueries) updateByPK(table string, columns []string, pkColumns [
 	}
 	query := "UPDATE " + table + " SET " + strings.Join(setSlice, ",") + " WHERE " + strings.Join(whereSlice, " AND ")
 
-	result, err := q.db.NamedExec(query, modelInstance)
+	result, err := r.db.NamedExec(query, modelInstance)
 	if err != nil {
 		return err
 	}
@@ -106,8 +106,8 @@ func (q *PostgresQueries) updateByPK(table string, columns []string, pkColumns [
 	return nil
 }
 
-func (q *PostgresQueries) deleteByID(table string, id int64) error {
-	result, err := q.db.Exec("DELETE FROM "+table+" WHERE id=$1", id)
+func (r *PostgresRepository) deleteByID(table string, id int64) error {
+	result, err := r.db.Exec("DELETE FROM "+table+" WHERE id=$1", id)
 	if err != nil {
 		return err
 	}
@@ -123,8 +123,8 @@ func (q *PostgresQueries) deleteByID(table string, id int64) error {
 	return nil
 }
 
-func (q *PostgresQueries) deleteWhere(table string, mustDeleteOne bool, whereQuery string, whereArgs ...interface{}) error {
-	result, err := q.db.Exec("DELETE FROM "+table+" WHERE "+whereQuery, whereArgs...)
+func (r *PostgresRepository) deleteWhere(table string, mustDeleteOne bool, whereQuery string, whereArgs ...interface{}) error {
+	result, err := r.db.Exec("DELETE FROM "+table+" WHERE "+whereQuery, whereArgs...)
 	if err != nil {
 		return err
 	}
@@ -143,9 +143,9 @@ func (q *PostgresQueries) deleteWhere(table string, mustDeleteOne bool, whereQue
 	return nil
 }
 
-func (q *PostgresQueries) count(table string, column string, whereQuery string, whereArgs ...interface{}) (int64, error) {
+func (r *PostgresRepository) count(table string, column string, whereQuery string, whereArgs ...interface{}) (int64, error) {
 	var count int64
-	if err := q.db.Get(&count, "SELECT count("+column+") FROM "+table+" WHERE "+whereQuery, whereArgs...); err != nil {
+	if err := r.db.Get(&count, "SELECT count("+column+") FROM "+table+" WHERE "+whereQuery, whereArgs...); err != nil {
 		return 0, err
 	}
 
