@@ -7,18 +7,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
+
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 
-	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
-
 	"github.com/joho/godotenv"
 
-	handlers "github.com/izruff/reviu-backend/internal/adapters/handlers/http"
-	repositories "github.com/izruff/reviu-backend/internal/adapters/repositories/postgres"
-	services "github.com/izruff/reviu-backend/internal/core/services"
+	handler "github.com/izruff/reviu-backend/internal/adapters/handler/http"
+	repository "github.com/izruff/reviu-backend/internal/adapters/repository/postgres"
+	service "github.com/izruff/reviu-backend/internal/core/services"
 )
 
 func main() {
@@ -35,13 +35,13 @@ func main() {
 	listenAddr := os.Getenv("LISTEN_ADDR")
 	origin := os.Getenv("ORIGIN")
 
-	repo := repositories.NewPostgresRepository(db)
-	service := services.NewAPIServices(repo)
-	handler := handlers.NewHTTPHandler(service, origin)
+	postgresRepo := repository.NewPostgresRepository(db)
+	services := service.NewAPIServices(postgresRepo)
+	httpHandler := handler.NewHTTPHandler(services, origin)
 
 	// TODO: configure listening address and other stuff
 	r := gin.Default()
-	SetupRoutes(r, handler)
+	SetupRoutes(r, httpHandler)
 
 	r.Run(listenAddr)
 }
@@ -75,7 +75,7 @@ func OpenPostgresDB(dsn string) (*sqlx.DB, error) {
 	return db, nil
 }
 
-func SetupRoutes(r *gin.Engine, h *handlers.HTTPHandler) {
+func SetupRoutes(r *gin.Engine, h *handler.HTTPHandler) {
 	r.Use(h.CORSMiddleware)
 
 	// Simple route for testing ping.
