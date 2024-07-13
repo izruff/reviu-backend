@@ -8,8 +8,8 @@ import (
 )
 
 // https://stackoverflow.com/questions/29418478/go-gin-framework-cors
-func (s *APIHandlers) CORSMiddleware(c *gin.Context) {
-	c.Writer.Header().Set("Access-Control-Allow-Origin", s.origin)
+func (h *HTTPHandler) CORSMiddleware(c *gin.Context) {
+	c.Writer.Header().Set("Access-Control-Allow-Origin", h.origin)
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 	c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 	c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
@@ -22,7 +22,7 @@ func (s *APIHandlers) CORSMiddleware(c *gin.Context) {
 	c.Next()
 }
 
-func (s *APIHandlers) JWTAuth(c *gin.Context) {
+func (h *HTTPHandler) JWTAuth(c *gin.Context) {
 	tokenString, err := c.Cookie("token")
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{

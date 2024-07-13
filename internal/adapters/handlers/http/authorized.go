@@ -5,11 +5,11 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/izruff/reviu-backend/internal/models"
+	"github.com/izruff/reviu-backend/internal/core/domain"
 	"gopkg.in/guregu/null.v3"
 )
 
-func (s *APIHandlers) UpdateUserProfile(c *gin.Context) {
+func (h *HTTPHandler) UpdateUserProfile(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
@@ -21,12 +21,12 @@ func (s *APIHandlers) UpdateUserProfile(c *gin.Context) {
 		return
 	}
 
-	updatedUser := &models.User{
+	updatedUser := &domain.User{
 		Nickname: json.Nickname,
 		About:    json.About,
 	}
 
-	err := s.services.UpdateUserByID(userID, updatedUser)
+	err := h.svc.UpdateUserByID(userID, updatedUser)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -37,11 +37,11 @@ func (s *APIHandlers) UpdateUserProfile(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (s *APIHandlers) GetUserPrivates(c *gin.Context) {
+func (h *HTTPHandler) GetUserPrivates(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
-	user, err := s.services.GetUserByID(userID)
+	user, err := h.svc.GetUserByID(userID)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -54,11 +54,11 @@ func (s *APIHandlers) GetUserPrivates(c *gin.Context) {
 	})
 }
 
-func (s *APIHandlers) GetUserSubscriptions(c *gin.Context) {
+func (h *HTTPHandler) GetUserSubscriptions(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
-	subscriptions, err := s.services.GetUserSubscriptions(userID)
+	subscriptions, err := h.svc.GetUserSubscriptions(userID)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -77,11 +77,11 @@ func (s *APIHandlers) GetUserSubscriptions(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (s *APIHandlers) GetUserBookmarks(c *gin.Context) {
+func (h *HTTPHandler) GetUserBookmarks(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
-	bookmarks, err := s.services.GetUserBookmarks(userID)
+	bookmarks, err := h.svc.GetUserBookmarks(userID)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -100,7 +100,7 @@ func (s *APIHandlers) GetUserBookmarks(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (s *APIHandlers) FollowUser(c *gin.Context) {
+func (h *HTTPHandler) FollowUser(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
@@ -112,7 +112,7 @@ func (s *APIHandlers) FollowUser(c *gin.Context) {
 		return
 	}
 
-	if err := s.services.FollowUserByID(userID, json.FollowingID); err != nil {
+	if err := h.svc.FollowUserByID(userID, json.FollowingID); err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
 		})
@@ -122,7 +122,7 @@ func (s *APIHandlers) FollowUser(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (s *APIHandlers) UnfollowUser(c *gin.Context) {
+func (h *HTTPHandler) UnfollowUser(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
@@ -134,7 +134,7 @@ func (s *APIHandlers) UnfollowUser(c *gin.Context) {
 		return
 	}
 
-	if err := s.services.UnfollowUserByID(userID, json.FollowingID); err != nil {
+	if err := h.svc.UnfollowUserByID(userID, json.FollowingID); err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
 		})
@@ -144,7 +144,7 @@ func (s *APIHandlers) UnfollowUser(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (s *APIHandlers) CreatePost(c *gin.Context) {
+func (h *HTTPHandler) CreatePost(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
@@ -156,7 +156,7 @@ func (s *APIHandlers) CreatePost(c *gin.Context) {
 		return
 	}
 
-	postID, err := s.services.CreatePost(json.Title, json.Content, userID, json.Topic, json.Hub, json.Tags)
+	postID, err := h.svc.CreatePost(json.Title, json.Content, userID, json.Topic, json.Hub, json.Tags)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -169,7 +169,7 @@ func (s *APIHandlers) CreatePost(c *gin.Context) {
 	})
 }
 
-func (s *APIHandlers) GetPostInteractions(c *gin.Context) {
+func (h *HTTPHandler) GetPostInteractions(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
@@ -181,7 +181,7 @@ func (s *APIHandlers) GetPostInteractions(c *gin.Context) {
 		return
 	}
 
-	viewed, voted, err := s.services.GetPostInteractionsByUserID(postID, userID)
+	viewed, voted, err := h.svc.GetPostInteractionsByUserID(postID, userID)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -196,7 +196,7 @@ func (s *APIHandlers) GetPostInteractions(c *gin.Context) {
 	c.JSON(http.StatusOK, postInteractions)
 }
 
-func (s *APIHandlers) ViewPost(c *gin.Context) {
+func (h *HTTPHandler) ViewPost(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
@@ -208,7 +208,7 @@ func (s *APIHandlers) ViewPost(c *gin.Context) {
 		return
 	}
 
-	if err := s.services.ViewPost(postID, userID); err != nil {
+	if err := h.svc.ViewPost(postID, userID); err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message, // TODO: error handling when the post was already viewed
 		})
@@ -218,7 +218,7 @@ func (s *APIHandlers) ViewPost(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
-func (s *APIHandlers) EditPost(c *gin.Context) {
+func (h *HTTPHandler) EditPost(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
@@ -230,7 +230,7 @@ func (s *APIHandlers) EditPost(c *gin.Context) {
 		return
 	}
 
-	post, err := s.services.GetPostByID(json.PostID)
+	post, err := h.svc.GetPostByID(json.PostID)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -244,12 +244,12 @@ func (s *APIHandlers) EditPost(c *gin.Context) {
 		return
 	}
 
-	updatedPost := &models.Post{
+	updatedPost := &domain.Post{
 		Title:   json.Title,
 		Content: json.Content,
 	}
 
-	if err := s.services.UpdatePostByID(json.PostID, updatedPost); err != nil {
+	if err := h.svc.UpdatePostByID(json.PostID, updatedPost); err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
 		})
@@ -259,7 +259,7 @@ func (s *APIHandlers) EditPost(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (s *APIHandlers) ReplyToPost(c *gin.Context) {
+func (h *HTTPHandler) ReplyToPost(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
@@ -271,7 +271,7 @@ func (s *APIHandlers) ReplyToPost(c *gin.Context) {
 		return
 	}
 
-	commentID, err := s.services.CreateComment(json.Content, userID, null.NewInt(json.PostID, true), null.NewInt(0, false))
+	commentID, err := h.svc.CreateComment(json.Content, userID, null.NewInt(json.PostID, true), null.NewInt(0, false))
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -284,7 +284,7 @@ func (s *APIHandlers) ReplyToPost(c *gin.Context) {
 	})
 }
 
-func (s *APIHandlers) VotePost(c *gin.Context) {
+func (h *HTTPHandler) VotePost(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
@@ -296,7 +296,7 @@ func (s *APIHandlers) VotePost(c *gin.Context) {
 		return
 	}
 
-	if err := s.services.VotePost(json.PostID, userID, json.Up); err != nil {
+	if err := h.svc.VotePost(json.PostID, userID, json.Up); err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
 		})
@@ -306,7 +306,7 @@ func (s *APIHandlers) VotePost(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
-func (s *APIHandlers) BookmarkPost(c *gin.Context) {
+func (h *HTTPHandler) BookmarkPost(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
@@ -318,7 +318,7 @@ func (s *APIHandlers) BookmarkPost(c *gin.Context) {
 		return
 	}
 
-	if err := s.services.BookmarkPostWithID(json.PostID, userID); err != nil {
+	if err := h.svc.BookmarkPostWithID(json.PostID, userID); err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
 		})
@@ -328,7 +328,7 @@ func (s *APIHandlers) BookmarkPost(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
-func (s *APIHandlers) ReplyToComment(c *gin.Context) {
+func (h *HTTPHandler) ReplyToComment(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
@@ -340,7 +340,7 @@ func (s *APIHandlers) ReplyToComment(c *gin.Context) {
 		return
 	}
 
-	commentID, err := s.services.CreateComment(json.Content, userID, null.NewInt(0, false), null.NewInt(json.ParentCommentID, true))
+	commentID, err := h.svc.CreateComment(json.Content, userID, null.NewInt(0, false), null.NewInt(json.ParentCommentID, true))
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -353,7 +353,7 @@ func (s *APIHandlers) ReplyToComment(c *gin.Context) {
 	})
 }
 
-func (s *APIHandlers) VoteComment(c *gin.Context) {
+func (h *HTTPHandler) VoteComment(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
@@ -365,7 +365,7 @@ func (s *APIHandlers) VoteComment(c *gin.Context) {
 		return
 	}
 
-	if err := s.services.VoteComment(json.CommentID, userID, json.Up); err != nil {
+	if err := h.svc.VoteComment(json.CommentID, userID, json.Up); err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
 		})
@@ -375,7 +375,7 @@ func (s *APIHandlers) VoteComment(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
-func (s *APIHandlers) EditComment(c *gin.Context) {
+func (h *HTTPHandler) EditComment(c *gin.Context) {
 	value, _ := c.Get("userID")
 	userID := value.(int64)
 
@@ -387,7 +387,7 @@ func (s *APIHandlers) EditComment(c *gin.Context) {
 		return
 	}
 
-	comment, err := s.services.GetCommentByID(json.CommentID)
+	comment, err := h.svc.GetCommentByID(json.CommentID)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -401,7 +401,7 @@ func (s *APIHandlers) EditComment(c *gin.Context) {
 		return
 	}
 
-	if err := s.services.UpdateCommentByID(json.CommentID, json.Content); err != nil {
+	if err := h.svc.UpdateCommentByID(json.CommentID, json.Content); err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
 		})
@@ -411,7 +411,7 @@ func (s *APIHandlers) EditComment(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (s *APIHandlers) CreateTopic(c *gin.Context) {
+func (h *HTTPHandler) CreateTopic(c *gin.Context) {
 	var json createTopicJSON
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -420,7 +420,7 @@ func (s *APIHandlers) CreateTopic(c *gin.Context) {
 		return
 	}
 
-	topicID, err := s.services.CreateTopic(json.Topic, json.Hub)
+	topicID, err := h.svc.CreateTopic(json.Topic, json.Hub)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,

@@ -7,7 +7,7 @@ import (
 	"github.com/izruff/reviu-backend/internal/utils"
 )
 
-func (h *APIHandlers) Login(c *gin.Context) {
+func (h *HTTPHandler) Login(c *gin.Context) {
 	var json loginJSON
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -16,7 +16,7 @@ func (h *APIHandlers) Login(c *gin.Context) {
 		return
 	}
 
-	userID, token, err := h.services.Login(json.UsernameOrEmail, json.Password)
+	userID, token, err := h.svc.Login(json.UsernameOrEmail, json.Password)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -32,7 +32,7 @@ func (h *APIHandlers) Login(c *gin.Context) {
 	})
 }
 
-func (h *APIHandlers) Signup(c *gin.Context) {
+func (h *HTTPHandler) Signup(c *gin.Context) {
 	var json signupJSON
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -41,7 +41,7 @@ func (h *APIHandlers) Signup(c *gin.Context) {
 		return
 	}
 
-	userID, token, err := h.services.Signup(json.Email, json.Username, json.Password)
+	userID, token, err := h.svc.Signup(json.Email, json.Username, json.Password)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -57,7 +57,7 @@ func (h *APIHandlers) Signup(c *gin.Context) {
 	})
 }
 
-func (h *APIHandlers) CheckToken(c *gin.Context) {
+func (h *HTTPHandler) CheckToken(c *gin.Context) {
 	tokenString, err := c.Cookie("token")
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{

@@ -2,14 +2,14 @@ package http
 
 import "github.com/gin-gonic/gin"
 
-func (s *APIHandlers) BanUser(c *gin.Context) {
+func (h *HTTPHandler) BanUser(c *gin.Context) {
 
 }
 
-func (s *APIHandlers) MarkPostAsDeleted(c *gin.Context) {
+func (h *HTTPHandler) MarkPostAsDeleted(c *gin.Context) {
 
 }
 
-func (s *APIHandlers) MarkCommentAsDeleted(c *gin.Context) {
+func (h *HTTPHandler) MarkCommentAsDeleted(c *gin.Context) {
 
 }
