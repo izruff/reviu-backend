@@ -6,14 +6,19 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 
-	"github.com/izruff/reviu-backend/internal/api"
 	"github.com/joho/godotenv"
+
+	handlers "github.com/izruff/reviu-backend/internal/adapters/handlers/http"
+	repositories "github.com/izruff/reviu-backend/internal/adapters/repositories/postgres"
+	services "github.com/izruff/reviu-backend/internal/core/services"
 )
 
 func main() {
@@ -30,11 +35,15 @@ func main() {
 	listenAddr := os.Getenv("LISTEN_ADDR")
 	origin := os.Getenv("ORIGIN")
 
+	repo := repositories.NewPostgresRepository(db)
+	service := services.NewAPIServices(repo)
+	handler := handlers.NewHTTPHandler(service, origin)
+
 	// TODO: configure listening address and other stuff
 	r := gin.Default()
-	SetupRoutes(r, httpHandler)
+	SetupRoutes(r, handler)
 
-	r.Run()
+	r.Run(listenAddr)
 }
 
 func OpenPostgresDB(dsn string) (*sqlx.DB, error) {
@@ -66,11 +75,11 @@ func OpenPostgresDB(dsn string) (*sqlx.DB, error) {
 	return db, nil
 }
 
-func SetupRoutes(r *gin.Engine) {
-	r.Use(s.handlers.CORSMiddleware)
+func SetupRoutes(r *gin.Engine, h *handlers.HTTPHandler) {
+	r.Use(h.CORSMiddleware)
 
 	// Simple route for testing ping.
-	r.GET("/ping", s.handlers.Ping)
+	r.GET("/ping", h.Ping)
 
 	// These routes are classified into four categories:
 	//   account: requests related to user authentication,
@@ -80,9 +89,9 @@ func SetupRoutes(r *gin.Engine) {
 
 	account := r.Group("/account")
 	{
-		account.POST("/login", s.handlers.Login)
-		account.POST("/signup", s.handlers.Signup)
-		account.GET("/check-token", s.handlers.CheckToken)
+		account.POST("/login", h.Login)
+		account.POST("/signup", h.Signup)
+		account.GET("/check-token", h.CheckToken)
 
 		// For security purposes, the actions below require a full login
 		// (email/username and password input), not a JWT token.
@@ -92,80 +101,80 @@ func SetupRoutes(r *gin.Engine) {
 	public := r.Group("/public")
 	{
 		users := public.Group("/users")
-		users.GET("", s.handlers.SearchUsers)
+		users.GET("", h.SearchUsers)
 		user := users.Group("/id/:userID")
 		{
-			user.GET("", s.handlers.GetUserProfile)
-			user.GET("/relations", s.handlers.GetUserRelations)
-			// user.GET("/activity", s.handlers.GetUserActivity)
+			user.GET("", h.GetUserProfile)
+			user.GET("/relations", h.GetUserRelations)
+			// user.GET("/activity", h.GetUserActivity)
 		}
 		userByName := users.Group("/name/:username")
 		{
-			userByName.GET("", s.handlers.GetUserProfileByUsername)
-			userByName.GET("/relations", s.handlers.GetUserRelationsByUsername)
-			// userByName.GET("/activity", s.handlers.GetUserActivityByUsername)
+			userByName.GET("", h.GetUserProfileByUsername)
+			userByName.GET("/relations", h.GetUserRelationsByUsername)
+			// userByName.GET("/activity", h.GetUserActivityByUsername)
 		}
 
 		posts := public.Group("/posts")
-		posts.GET("/search", s.handlers.SearchPosts)
-		posts.GET("/id/:postID", s.handlers.GetPost)
-		posts.GET("/id/:postID/replies", s.handlers.GetRepliesToPost)
+		posts.GET("/search", h.SearchPosts)
+		posts.GET("/id/:postID", h.GetPost)
+		posts.GET("/id/:postID/replies", h.GetRepliesToPost)
 
 		comments := public.Group("/comments")
-		comments.GET("/search", s.handlers.SearchComments)
-		comments.GET("/id/:commentID", s.handlers.GetComment)
-		comments.GET("/id/:commentID/replies", s.handlers.GetRepliesToComment)
+		comments.GET("/search", h.SearchComments)
+		comments.GET("/id/:commentID", h.GetComment)
+		comments.GET("/id/:commentID/replies", h.GetRepliesToComment)
 
 		topics := public.Group("/topics")
-		topics.GET("", s.handlers.SearchTopics)
+		topics.GET("", h.SearchTopics)
 		topic := topics.Group("/id/:topicID")
 		{
-			topic.GET("", s.handlers.GetTopic)
+			topic.GET("", h.GetTopic)
 		}
-		// topics.GET("/id/:topicID", s.handlers.GetTopic)
+		// topics.GET("/id/:topicID", h.GetTopic)
 
 		tags := public.Group("/tags")
-		tags.GET("", s.handlers.SearchTags)
+		tags.GET("", h.SearchTags)
 	}
 
-	authorized := r.Group("/authorized", s.handlers.JWTAuth)
+	authorized := r.Group("/authorized", h.JWTAuth)
 	{
 		users := authorized.Group("/users")
-		users.PATCH("/me", s.handlers.UpdateUserProfile)
-		users.GET("/me/private", s.handlers.GetUserPrivates)
-		users.GET("/me/subscriptions", s.handlers.GetUserSubscriptions)
-		users.GET("/me/bookmarks", s.handlers.GetUserBookmarks)
-		users.POST("/follow", s.handlers.FollowUser)
-		users.DELETE("/unfollow", s.handlers.UnfollowUser)
+		users.PATCH("/me", h.UpdateUserProfile)
+		users.GET("/me/private", h.GetUserPrivates)
+		users.GET("/me/subscriptions", h.GetUserSubscriptions)
+		users.GET("/me/bookmarks", h.GetUserBookmarks)
+		users.POST("/follow", h.FollowUser)
+		users.DELETE("/unfollow", h.UnfollowUser)
 
 		posts := authorized.Group("/posts")
-		posts.POST("/create", s.handlers.CreatePost)
+		posts.POST("/create", h.CreatePost)
 		post := posts.Group("/id/:postID")
 		{
-			post.GET("", s.handlers.GetPostInteractions)
-			post.POST("/view", s.handlers.ViewPost)
-			post.PATCH("/edit", s.handlers.EditPost)
-			post.POST("/reply", s.handlers.ReplyToPost)
-			post.POST("/vote", s.handlers.VotePost)
-			post.POST("/bookmark", s.handlers.BookmarkPost)
+			post.GET("", h.GetPostInteractions)
+			post.POST("/view", h.ViewPost)
+			post.PATCH("/edit", h.EditPost)
+			post.POST("/reply", h.ReplyToPost)
+			post.POST("/vote", h.VotePost)
+			post.POST("/bookmark", h.BookmarkPost)
 		}
 
 		comments := authorized.Group("/comments")
 		comment := comments.Group("/id/:commentID")
 		{
-			comment.POST("/reply", s.handlers.ReplyToComment)
-			comment.POST("/vote", s.handlers.VoteComment)
-			comment.PATCH("/edit", s.handlers.EditComment)
+			comment.POST("/reply", h.ReplyToComment)
+			comment.POST("/vote", h.VoteComment)
+			comment.PATCH("/edit", h.EditComment)
 		}
 
 		topics := authorized.Group("/topics")
-		topics.POST("/create", s.handlers.CreateTopic)
+		topics.POST("/create", h.CreateTopic)
 	}
 
 	moderator := r.Group("/moderator")
 	{
-		moderator.POST("/users/ban", s.handlers.BanUser)
-		moderator.PATCH("/posts/delete", s.handlers.MarkPostAsDeleted)
-		moderator.PATCH("/comments/delete", s.handlers.MarkCommentAsDeleted)
+		moderator.POST("/users/ban", h.BanUser)
+		moderator.PATCH("/posts/delete", h.MarkPostAsDeleted)
+		moderator.PATCH("/comments/delete", h.MarkCommentAsDeleted)
 	}
 }
