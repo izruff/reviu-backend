@@ -8,12 +8,14 @@ import (
 )
 
 type APIServices struct {
-	repo ports.Repository
+	repo  ports.Repository
+	cache ports.Cache
 }
 
-func NewAPIServices(repo ports.Repository) *APIServices {
+func NewAPIServices(repo ports.Repository, cache ports.Cache) *APIServices {
 	return &APIServices{
-		repo: repo,
+		repo:  repo,
+		cache: cache,
 	}
 }
 

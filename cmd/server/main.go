@@ -10,12 +10,15 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 
+	"github.com/redis/go-redis/v9"
+
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 
 	"github.com/joho/godotenv"
 
+	cache "github.com/izruff/reviu-backend/internal/adapters/cache/redis"
 	handler "github.com/izruff/reviu-backend/internal/adapters/handler/http"
 	repository "github.com/izruff/reviu-backend/internal/adapters/repository/postgres"
 	service "github.com/izruff/reviu-backend/internal/core/services"
@@ -32,11 +35,18 @@ func main() {
 		panic(err)
 	}
 
+	dsn = os.Getenv("REVIU_URI")
+	redisClient, err := OpenRedisCache(dsn)
+	if err != nil {
+		panic(err)
+	}
+
 	listenAddr := os.Getenv("LISTEN_ADDR")
 	origin := os.Getenv("ORIGIN")
 
 	postgresRepo := repository.NewPostgresRepository(db)
-	services := service.NewAPIServices(postgresRepo)
+	redisCache := cache.NewRedisCache(redisClient)
+	services := service.NewAPIServices(postgresRepo, redisCache)
 	httpHandler := handler.NewHTTPHandler(services, origin)
 
 	// TODO: configure listening address and other stuff
@@ -73,6 +83,20 @@ func OpenPostgresDB(dsn string) (*sqlx.DB, error) {
 	m.Up()
 
 	return db, nil
+}
+
+func OpenRedisCache(dsn string) (*redis.Client, error) {
+	opt, _ := redis.ParseURL(dsn)
+	client := redis.NewClient(opt)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	client.Set(ctx, "foo", "bar", 0)
+	val := client.Get(ctx, "foo").Val()
+	print(val)
+
+	return client, nil
 }
 
 func SetupRoutes(r *gin.Engine, h *handler.HTTPHandler) {
