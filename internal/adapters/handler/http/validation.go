@@ -30,7 +30,6 @@ type createPostJSON struct {
 	Title   string   `json:"title" binding:"required"`
 	Content string   `json:"content" binding:"required"`
 	Topic   string   `json:"topic" binding:"required"`
-	Hub     string   `json:"hub" binding:"required"`
 	Tags    []string `json:"tags"`
 }
 
@@ -73,7 +72,6 @@ type editCommentJSON struct {
 
 type createTopicJSON struct {
 	Topic string `json:"topic" binding:"required"`
-	Hub   string `json:"hub" binding:"required"`
 }
 
 type postInteractionsResponse struct {

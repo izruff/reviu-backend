@@ -5,15 +5,14 @@ import (
 	"gopkg.in/guregu/null.v3"
 )
 
-func (s *APIServices) CreatePost(title string, content string, authorID int64, topic string, hub string, tags []string) (int64, *SvcError) {
+func (s *APIServices) CreatePost(title string, content string, authorID int64, topic string, tags []string) (int64, *SvcError) {
 	newTopic := &domain.Topic{
 		Topic: null.NewString(topic, true),
-		Hub:   null.NewString(hub, true),
 	}
 	topicID, err := s.repo.CreateTopic(newTopic)
 	if err != nil {
 		if true { // TODO: error handling when tag already exists (replace true with err != ...)
-			topicID, err = s.repo.GetTopicID(topic, hub)
+			topicID, err = s.repo.GetTopicID(topic)
 			if err != nil {
 				return 0, newErrInternal(err)
 			}
@@ -38,7 +37,6 @@ func (s *APIServices) CreatePost(title string, content string, authorID int64, t
 	for _, tag := range tags {
 		newTag := &domain.Tag{
 			Tag: null.NewString(tag, true),
-			Hub: null.NewString(hub, true),
 		}
 		tagID, err := s.repo.CreateTag(newTag) // return tagID or not?
 		if err != nil && true {                // TODO: error handling when tag already exists (replace true with err != ...)

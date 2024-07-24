@@ -156,7 +156,7 @@ func (h *HTTPHandler) CreatePost(c *gin.Context) {
 		return
 	}
 
-	postID, err := h.svc.CreatePost(json.Title, json.Content, userID, json.Topic, json.Hub, json.Tags)
+	postID, err := h.svc.CreatePost(json.Title, json.Content, userID, json.Topic, json.Tags)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
@@ -420,7 +420,7 @@ func (h *HTTPHandler) CreateTopic(c *gin.Context) {
 		return
 	}
 
-	topicID, err := h.svc.CreateTopic(json.Topic, json.Hub)
+	topicID, err := h.svc.CreateTopic(json.Topic)
 	if err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,

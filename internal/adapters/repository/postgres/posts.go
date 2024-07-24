@@ -82,7 +82,7 @@ func (r *PostgresRepository) GetPostsWithOptions(options *domain.SearchPostsOpti
 		whereQueries = append(whereQueries, "author_id IN (SELECT id FROM users WHERE username IN ("+subsubquery+"))")
 	}
 
-	// TODO: handle topics and tags list (must include both name and hub since names are not necessarily distinct)
+	// TODO: handle topics and tags list
 
 	posts := []domain.Post{}
 	if err := r.selectAll(&posts, "posts", "*", strings.Join(whereQueries, " AND "), orderBy, queryArgs...); err != nil {

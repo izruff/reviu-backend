@@ -8,8 +8,8 @@ import (
 )
 
 func (r *PostgresRepository) CreateTopic(newTopic *domain.Topic) (int64, error) {
-	topicID, err := r.create("topics", []string{"topic", "hub"}, true, newTopic)
-	// TODO: error handling when form is incomplete or hub does not exist
+	topicID, err := r.create("topics", []string{"topic"}, true, newTopic)
+	// TODO: error handling when form is incomplete
 	if err != nil {
 		return 0, err
 	}
@@ -26,9 +26,9 @@ func (r *PostgresRepository) GetTopicByID(id int64) (*domain.Topic, error) {
 	return topic, nil
 }
 
-func (r *PostgresRepository) GetTopicID(topic string, hub string) (int64, error) {
+func (r *PostgresRepository) GetTopicID(topic string) (int64, error) {
 	var topicID int64
-	if err := r.selectOne(&topicID, "topics", "id", "topic=$1 AND hub=$2", topic, hub); err != nil {
+	if err := r.selectOne(&topicID, "topics", "id", "topic=$1", topic); err != nil {
 		return 0, err // TODO: error handling when user does not exist
 	}
 

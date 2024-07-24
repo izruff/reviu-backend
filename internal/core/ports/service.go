@@ -27,12 +27,12 @@ type Service interface {
 	GetUserSubscriptions(id int64) ([]domain.Subscription, *SvcError)
 	GetUserBookmarks(id int64) ([]domain.Bookmark, *SvcError)
 
-	CreateTopic(topic string, hub string) (int64, *SvcError)
+	CreateTopic(topic string) (int64, *SvcError)
 	GetTopicByID(id int64) (*domain.Topic, *SvcError)
 	UpdateTopicByID(id int64, description string) *SvcError
 	SearchTopics(options *domain.SearchTopicsOptions) ([]domain.Topic, *SvcError)
 
-	CreatePost(title string, content string, authorID int64, topic string, hub string, tags []string) (int64, *SvcError)
+	CreatePost(title string, content string, authorID int64, topic string, tags []string) (int64, *SvcError)
 	GetPostByID(id int64) (*domain.Post, *SvcError)
 	GetPostInteractionsByUserID(id int64, userID int64) (bool, *null.Bool, *SvcError)
 	UpdatePostByID(id int64, updatedPost *domain.Post) *SvcError
@@ -50,7 +50,7 @@ type Service interface {
 	VoteComment(id int64, userID int64, up null.Bool) *SvcError
 	SearchComments(options *domain.SearchCommentsOptions) ([]domain.Comment, *SvcError)
 
-	CreateTag(tag string, hub string) (int64, *SvcError)
+	CreateTag(tag string) (int64, *SvcError)
 	GetTagByID(id int64) (*domain.Tag, *SvcError)
 	SearchTags(options *domain.SearchTagsOptions) ([]domain.Tag, *SvcError)
 }

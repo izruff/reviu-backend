@@ -5,10 +5,9 @@ import (
 	"gopkg.in/guregu/null.v3"
 )
 
-func (s *APIServices) CreateTag(tag string, hub string) (int64, *SvcError) {
+func (s *APIServices) CreateTag(tag string) (int64, *SvcError) {
 	newTag := &domain.Tag{
 		Tag: null.NewString(tag, true),
-		Hub: null.NewString(hub, true),
 	}
 
 	tagID, err := s.repo.CreateTag(newTag)

@@ -5,10 +5,9 @@ import (
 	"gopkg.in/guregu/null.v3"
 )
 
-func (s *APIServices) CreateTopic(topic string, hub string) (int64, *SvcError) {
+func (s *APIServices) CreateTopic(topic string) (int64, *SvcError) {
 	newTopic := &domain.Topic{
 		Topic: null.NewString(topic, true),
-		Hub:   null.NewString(hub, true),
 	}
 
 	topicID, err := s.repo.CreateTopic(newTopic)

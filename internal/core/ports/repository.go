@@ -18,7 +18,7 @@ type Repository interface {
 
 	CreateTopic(newTopic *domain.Topic) (int64, error)
 	GetTopicByID(id int64) (*domain.Topic, error)
-	GetTopicID(topic string, hub string) (int64, error)
+	GetTopicID(topic string) (int64, error)
 	GetTopicsWithOptions(options *domain.SearchTopicsOptions) ([]domain.Topic, error)
 	UpdateTopicByID(id int64, description string) error
 

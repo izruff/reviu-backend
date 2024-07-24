@@ -8,8 +8,8 @@ import (
 )
 
 func (r *PostgresRepository) CreateTag(newTag *domain.Tag) (int64, error) {
-	tagID, err := r.create("tags", []string{"tag", "hub"}, true, newTag)
-	// TODO: error handling when form is incomplete or hub does not exist
+	tagID, err := r.create("tags", []string{"tag"}, true, newTag)
+	// TODO: error handling when form is incomplete
 	if err != nil {
 		return 0, err
 	}
