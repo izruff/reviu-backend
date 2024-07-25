@@ -20,9 +20,20 @@ func (s *APIServices) CreateTopic(topic string) (int64, *SvcError) {
 }
 
 func (s *APIServices) GetTopicByID(id int64) (*domain.Topic, *SvcError) {
+	topic, cErr := s.cache.GetTopicFieldsByID(id, "topic", "description", "createdAt")
+	if cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
+	} else {
+		return topic, nil
+	}
+
 	topic, err := s.repo.GetTopicByID(id)
 	if err != nil {
 		return nil, newErrInternal(err) // TODO: error handling when topic does not exist
+	}
+
+	if cErr = s.cache.SetTopicFieldsByID(id, topic); cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
 	}
 
 	return topic, nil
@@ -41,6 +52,13 @@ func (s *APIServices) UpdateTopicByID(id int64, description string) *SvcError {
 	if err := s.repo.UpdateTopicByID(id, description); err != nil {
 		// TODO: error handling when user does not exist
 		return newErrInternal(err)
+	}
+
+	updatedTopic := &domain.Topic{
+		Description: null.NewString(description, true),
+	}
+	if cErr := s.cache.SetTopicFieldsByID(id, updatedTopic); cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
 	}
 
 	return nil

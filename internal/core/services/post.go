@@ -1,6 +1,8 @@
 package services
 
 import (
+	"time"
+
 	"github.com/izruff/reviu-backend/internal/core/domain"
 	"gopkg.in/guregu/null.v3"
 )
@@ -56,16 +58,28 @@ func (s *APIServices) CreatePost(title string, content string, authorID int64, t
 }
 
 func (s *APIServices) GetPostByID(id int64) (*domain.Post, *SvcError) {
+	post, cErr := s.cache.GetPostFieldsByID(id, "title", "content", "authorId", "topicId", "createdAt", "updatedAt", "deletedDetails", "viewCount", "voteCount")
+	if cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
+	} else {
+		return post, nil
+	}
+
 	post, err := s.repo.GetPostByID(id)
 	if err != nil {
 		// TODO: error handling when post does not exist
 		return nil, newErrInternal(err)
 	}
 
+	if cErr = s.cache.SetPostFieldsByID(id, post); cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
+	}
+
 	return post, nil
 }
 
 func (s *APIServices) GetPostInteractionsByUserID(id int64, userID int64) (bool, *null.Bool, *SvcError) {
+	// CacheTODO: Should we cache this?
 	viewed, err := s.repo.GetPostViewValue(id, userID)
 	if err != nil {
 		return false, nil, newErrInternal(err)
@@ -88,6 +102,10 @@ func (s *APIServices) UpdatePostByID(id int64, updatedPost *domain.Post) *SvcErr
 		return newErrInternal(err)
 	}
 
+	if cErr := s.cache.SetPostFieldsByID(id, updatedPost); cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
+	}
+
 	return nil
 }
 
@@ -97,10 +115,21 @@ func (s *APIServices) MarkPostAsDeletedByID(id int64, reasonForDeletion string, 
 		return newErrInternal(err)
 	}
 
+	// cache must update successfully
+	updatedPost := &domain.Post{
+		DeletedAt:         null.NewTime(time.Now(), true),
+		ReasonForDeletion: null.NewString(reasonForDeletion, true),
+		ModeratorID:       null.NewInt(moderatorID, true),
+	}
+	if cErr := s.cache.SetPostFieldsByID(id, updatedPost); cErr != nil {
+		return newErrInternal(cErr.Err) // CacheTODO
+	}
+
 	return nil
 }
 
 func (s *APIServices) ViewPost(id int64, userID int64) *SvcError {
+	// CacheTODO: Should update view count and make sure repository function returns delta value
 	newView := &domain.PostView{
 		PostID: null.NewInt(id, true),
 		UserID: null.NewInt(userID, true),
@@ -115,6 +144,7 @@ func (s *APIServices) ViewPost(id int64, userID int64) *SvcError {
 
 func (s *APIServices) VotePost(id int64, userID int64, up null.Bool) *SvcError {
 	// TODO: this logic is assuming there is no possibility for other weird internal errors
+	// CacheTODO: Should update vote count and make sure repository function returns delta value
 	if !up.Valid {
 		s.repo.DeletePostVote(id, userID)
 		return nil

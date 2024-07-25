@@ -20,15 +20,27 @@ func (s *APIServices) CreateTag(tag string) (int64, *SvcError) {
 }
 
 func (s *APIServices) GetTagByID(id int64) (*domain.Tag, *SvcError) {
+	tag, cErr := s.cache.GetTagFieldsByID(id, "tag", "createdAt")
+	if cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
+	} else {
+		return tag, nil
+	}
+
 	tag, err := s.repo.GetTagByID(id)
 	if err != nil {
 		return nil, newErrInternal(err) // TODO: error handling when tag does not exist
+	}
+
+	if cErr = s.cache.SetTagFieldsByID(id, tag); cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
 	}
 
 	return tag, nil
 }
 
 func (s *APIServices) GetTagID(tag string) (int64, *SvcError) {
+	// CacheTODO: Should we cache this? Do we even need this?
 	topicID, err := s.repo.GetTagID(tag)
 	if err != nil {
 		return 0, newErrInternal(err) // TODO: error handling when topic does not exist

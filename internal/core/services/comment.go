@@ -1,6 +1,8 @@
 package services
 
 import (
+	"time"
+
 	"github.com/izruff/reviu-backend/internal/core/domain"
 	"gopkg.in/guregu/null.v3"
 )
@@ -35,10 +37,21 @@ func (s *APIServices) CreateComment(content string, authorID int64, postID null.
 }
 
 func (s *APIServices) GetCommentByID(commentID int64) (*domain.Comment, *SvcError) {
+	comment, cErr := s.cache.GetCommentFieldsByID(commentID, "content", "authorId", "postAndParentCommentId", "createdAt", "updatedAt", "deletedDetails", "voteCount")
+	if cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
+	} else {
+		return comment, nil
+	}
+
 	comment, err := s.repo.GetCommentByID(commentID)
 	if err != nil {
 		// TODO: error handling when comment does not exist
 		return nil, newErrInternal(err)
+	}
+
+	if cErr = s.cache.SetCommentFieldsByID(commentID, comment); cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
 	}
 
 	return comment, nil
@@ -54,6 +67,10 @@ func (s *APIServices) UpdateCommentByID(commentID int64, content string) *SvcErr
 		return newErrInternal(err)
 	}
 
+	if cErr := s.cache.SetCommentFieldsByID(commentID, updatedComment); cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
+	}
+
 	return nil
 }
 
@@ -63,11 +80,22 @@ func (s *APIServices) MarkCommentAsDeletedByID(commentID int64, postID int64, re
 		return newErrInternal(err)
 	}
 
+	// cache must update successfully
+	updatedComment := &domain.Comment{
+		DeletedAt:         null.NewTime(time.Now(), true),
+		ReasonForDeletion: null.NewString(reasonForDeletion, true),
+		ModeratorID:       null.NewInt(moderatorID, true),
+	}
+	if cErr := s.cache.SetCommentFieldsByID(commentID, updatedComment); cErr != nil {
+		return newErrInternal(cErr.Err) // CacheTODO
+	}
+
 	return nil
 }
 
 func (s *APIServices) VoteComment(id int64, userID int64, up null.Bool) *SvcError {
 	// TODO: this logic is assuming there is no possibility for other weird internal errors
+	// CacheTODO: Should update vote count and make sure repository function returns delta value
 	if !up.Valid {
 		s.repo.DeleteCommentVote(id, userID)
 		return nil
