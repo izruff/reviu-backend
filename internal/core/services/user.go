@@ -113,9 +113,7 @@ func (s *APIServices) GetUserIDByUsername(username string) (int64, *SvcError) {
 }
 
 func (s *APIServices) UpdateUserByID(id int64, updatedUser *domain.User) *SvcError {
-	// TODO: error handling when there are no changes
-	updatedUser.ID.Int64 = id
-	updatedUser.ID.Valid = true
+	updatedUser.ID.SetValid(id)
 	if err := s.repo.UpdateUserByID(updatedUser); err != nil {
 		// TODO: error handling when user does not exist
 		return newErrInternal(err)

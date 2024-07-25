@@ -48,15 +48,13 @@ func (s *APIServices) GetTopicID(topic string) (int64, *SvcError) {
 	return topicID, nil
 }
 
-func (s *APIServices) UpdateTopicByID(id int64, description string) *SvcError {
-	if err := s.repo.UpdateTopicByID(id, description); err != nil {
-		// TODO: error handling when user does not exist
+func (s *APIServices) UpdateTopicByID(id int64, updatedTopic *domain.Topic) *SvcError {
+	updatedTopic.ID.SetValid(id)
+	if err := s.repo.UpdateTopicByID(updatedTopic); err != nil {
+		// TODO: error handling when topic does not exist
 		return newErrInternal(err)
 	}
 
-	updatedTopic := &domain.Topic{
-		Description: null.NewString(description, true),
-	}
 	if cErr := s.cache.SetTopicFieldsByID(id, updatedTopic); cErr != nil {
 		print(cErr.Err.Error()) // CacheTODO
 	}

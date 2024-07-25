@@ -401,7 +401,11 @@ func (h *HTTPHandler) EditComment(c *gin.Context) {
 		return
 	}
 
-	if err := h.svc.UpdateCommentByID(json.CommentID, json.Content); err != nil {
+	updatedComment := &domain.Comment{
+		Content: null.NewString(json.Content, true),
+	}
+
+	if err := h.svc.UpdateCommentByID(json.CommentID, updatedComment); err != nil {
 		c.JSON(err.Code, gin.H{
 			"error": err.Message,
 		})

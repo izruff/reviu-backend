@@ -8,3 +8,5 @@ type Topic struct {
 	Description null.String `db:"description" json:"description"`
 	CreatedAt   null.Time   `db:"created_at" json:"createdAt"`
 }
+
+// TODO: Add an `UpdatedAt` field

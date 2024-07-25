@@ -16,8 +16,7 @@ func (s *APIServices) CreateComment(content string, authorID int64, postID null.
 		if err != nil {
 			return 0, newErrInternal(err)
 		}
-		postID.Int64 = parentComment.PostID.Int64
-		postID.Valid = true
+		postID.SetValid(parentComment.PostID.Int64)
 	}
 
 	newComment := &domain.Comment{
@@ -36,57 +35,54 @@ func (s *APIServices) CreateComment(content string, authorID int64, postID null.
 	return commentID, nil
 }
 
-func (s *APIServices) GetCommentByID(commentID int64) (*domain.Comment, *SvcError) {
-	comment, cErr := s.cache.GetCommentFieldsByID(commentID, "content", "authorId", "postAndParentCommentId", "createdAt", "updatedAt", "deletedDetails", "voteCount")
+func (s *APIServices) GetCommentByID(id int64) (*domain.Comment, *SvcError) {
+	comment, cErr := s.cache.GetCommentFieldsByID(id, "content", "authorId", "postAndParentCommentId", "createdAt", "updatedAt", "deletedDetails", "voteCount")
 	if cErr != nil {
 		print(cErr.Err.Error()) // CacheTODO
 	} else {
 		return comment, nil
 	}
 
-	comment, err := s.repo.GetCommentByID(commentID)
+	comment, err := s.repo.GetCommentByID(id)
 	if err != nil {
 		// TODO: error handling when comment does not exist
 		return nil, newErrInternal(err)
 	}
 
-	if cErr = s.cache.SetCommentFieldsByID(commentID, comment); cErr != nil {
+	if cErr = s.cache.SetCommentFieldsByID(id, comment); cErr != nil {
 		print(cErr.Err.Error()) // CacheTODO
 	}
 
 	return comment, nil
 }
 
-func (s *APIServices) UpdateCommentByID(commentID int64, content string) *SvcError {
-	updatedComment := &domain.Comment{
-		ID:      null.NewInt(commentID, true),
-		Content: null.NewString(content, true),
-	}
+func (s *APIServices) UpdateCommentByID(id int64, updatedComment *domain.Comment) *SvcError {
+	updatedComment.ID.SetValid(id)
 	if err := s.repo.UpdateCommentByID(updatedComment); err != nil {
 		// TODO: error handling when comment does not exist
 		return newErrInternal(err)
 	}
 
-	if cErr := s.cache.SetCommentFieldsByID(commentID, updatedComment); cErr != nil {
+	if cErr := s.cache.SetCommentFieldsByID(id, updatedComment); cErr != nil {
 		print(cErr.Err.Error()) // CacheTODO
 	}
 
 	return nil
 }
 
-func (s *APIServices) MarkCommentAsDeletedByID(commentID int64, postID int64, reasonForDeletion string, moderatorID int64) *SvcError {
-	if err := s.repo.MarkCommentAsDeletedByID(commentID, reasonForDeletion, moderatorID); err != nil {
+func (s *APIServices) MarkCommentAsDeletedByID(id int64, deletedAt time.Time, reasonForDeletion string, moderatorID int64) *SvcError {
+	if err := s.repo.MarkCommentAsDeletedByID(id, deletedAt, reasonForDeletion, moderatorID); err != nil {
 		// TODO: error handling when comment does not exist
 		return newErrInternal(err)
 	}
 
 	// cache must update successfully
 	updatedComment := &domain.Comment{
-		DeletedAt:         null.NewTime(time.Now(), true),
+		DeletedAt:         null.NewTime(deletedAt, true),
 		ReasonForDeletion: null.NewString(reasonForDeletion, true),
 		ModeratorID:       null.NewInt(moderatorID, true),
 	}
-	if cErr := s.cache.SetCommentFieldsByID(commentID, updatedComment); cErr != nil {
+	if cErr := s.cache.SetCommentFieldsByID(id, updatedComment); cErr != nil {
 		return newErrInternal(cErr.Err) // CacheTODO
 	}
 

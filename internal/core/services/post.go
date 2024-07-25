@@ -94,9 +94,7 @@ func (s *APIServices) GetPostInteractionsByUserID(id int64, userID int64) (bool,
 }
 
 func (s *APIServices) UpdatePostByID(id int64, updatedPost *domain.Post) *SvcError {
-	// TODO: error handling when there are no changes
-	updatedPost.ID.Int64 = id
-	updatedPost.ID.Valid = true
+	updatedPost.ID.SetValid(id)
 	if err := s.repo.UpdatePostByID(updatedPost); err != nil {
 		// TODO: error handling when post does not exist
 		return newErrInternal(err)
@@ -109,15 +107,15 @@ func (s *APIServices) UpdatePostByID(id int64, updatedPost *domain.Post) *SvcErr
 	return nil
 }
 
-func (s *APIServices) MarkPostAsDeletedByID(id int64, reasonForDeletion string, moderatorID int64) *SvcError {
-	if err := s.repo.MarkPostAsDeletedByID(id, reasonForDeletion, moderatorID); err != nil {
+func (s *APIServices) MarkPostAsDeletedByID(id int64, deletedAt time.Time, reasonForDeletion string, moderatorID int64) *SvcError {
+	if err := s.repo.MarkPostAsDeletedByID(id, deletedAt, reasonForDeletion, moderatorID); err != nil {
 		// TODO: error handling when post does not exist
 		return newErrInternal(err)
 	}
 
 	// cache must update successfully
 	updatedPost := &domain.Post{
-		DeletedAt:         null.NewTime(time.Now(), true),
+		DeletedAt:         null.NewTime(deletedAt, true),
 		ReasonForDeletion: null.NewString(reasonForDeletion, true),
 		ModeratorID:       null.NewInt(moderatorID, true),
 	}

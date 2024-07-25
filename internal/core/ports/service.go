@@ -30,14 +30,14 @@ type Service interface {
 	CreateTopic(topic string) (int64, *SvcError)
 	GetTopicByID(id int64) (*domain.Topic, *SvcError)
 	GetTopicID(topic string) (int64, *SvcError)
-	UpdateTopicByID(id int64, description string) *SvcError
+	UpdateTopicByID(id int64, updatedTopic *domain.Topic) *SvcError
 	SearchTopics(options *domain.SearchTopicsOptions) ([]domain.Topic, *SvcError)
 
 	CreatePost(title string, content string, authorID int64, topic string, tags []string) (int64, *SvcError)
 	GetPostByID(id int64) (*domain.Post, *SvcError)
 	GetPostInteractionsByUserID(id int64, userID int64) (bool, *null.Bool, *SvcError)
 	UpdatePostByID(id int64, updatedPost *domain.Post) *SvcError
-	MarkPostAsDeletedByID(id int64, reasonForDeletion string, moderatorID int64) *SvcError
+	MarkPostAsDeletedByID(id int64, deletedAt time.Time, reasonForDeletion string, moderatorID int64) *SvcError
 	ViewPost(id int64, userID int64) *SvcError
 	VotePost(id int64, userID int64, up null.Bool) *SvcError
 	SearchPosts(options *domain.SearchPostsOptions) ([]domain.Post, *SvcError)
@@ -45,9 +45,9 @@ type Service interface {
 	BookmarkPostWithID(postID int64, userID int64) *SvcError
 
 	CreateComment(content string, authorID int64, postID null.Int, parentCommentID null.Int) (int64, *SvcError)
-	GetCommentByID(commentID int64) (*domain.Comment, *SvcError)
-	UpdateCommentByID(commentID int64, content string) *SvcError
-	MarkCommentAsDeletedByID(commentID int64, postID int64, reasonForDeletion string, moderatorID int64) *SvcError
+	GetCommentByID(id int64) (*domain.Comment, *SvcError)
+	UpdateCommentByID(id int64, updatedComment *domain.Comment) *SvcError
+	MarkCommentAsDeletedByID(id int64, deletedAt time.Time, reasonForDeletion string, moderatorID int64) *SvcError
 	VoteComment(id int64, userID int64, up null.Bool) *SvcError
 	SearchComments(options *domain.SearchCommentsOptions) ([]domain.Comment, *SvcError)
 

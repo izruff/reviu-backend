@@ -98,12 +98,12 @@ func (r *PostgresRepository) UpdateCommentByID(updatedComment *domain.Comment) e
 	return nil
 }
 
-func (r *PostgresRepository) MarkCommentAsDeletedByID(id int64, reason string, moderatorID int64) error {
+func (r *PostgresRepository) MarkCommentAsDeletedByID(id int64, at time.Time, reason string, moderatorID int64) error {
 	updatedComment := &domain.Comment{
 		ID:                null.NewInt(id, true),
 		ReasonForDeletion: null.NewString(reason, true),
 		ModeratorID:       null.NewInt(moderatorID, true),
-		DeletedAt:         null.NewTime(time.Now(), true),
+		DeletedAt:         null.NewTime(at, true),
 	}
 	if err := r.updateByID("comments", []string{"reason_for_deletion", "moderator_id", "deleted_at"}, updatedComment); err != nil {
 		return err // TODO: error handling when comment does not exist

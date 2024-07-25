@@ -78,6 +78,20 @@ func (r *PostgresRepository) GetTopicsWithOptions(options *domain.SearchTopicsOp
 	return topics, nil
 }
 
-func (r *PostgresRepository) UpdateTopicByID(id int64, description string) error {
-	return nil // TODO: migrate the schema first
+func (r *PostgresRepository) UpdateTopicByID(updatedTopic *domain.Topic) error {
+	if !updatedTopic.ID.Valid {
+		return errors.New("ID not provided")
+	}
+
+	var columns []string
+	if updatedTopic.Description.Valid {
+		columns = append(columns, "description")
+	}
+	// TODO: error handling if nothing is updated
+
+	if err := r.updateByID("topics", columns, updatedTopic); err != nil {
+		return err // TODO: error handling when post does not exist
+	}
+
+	return nil
 }

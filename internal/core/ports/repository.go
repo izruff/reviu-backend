@@ -20,20 +20,20 @@ type Repository interface {
 	GetTopicByID(id int64) (*domain.Topic, error)
 	GetTopicID(topic string) (int64, error)
 	GetTopicsWithOptions(options *domain.SearchTopicsOptions) ([]domain.Topic, error)
-	UpdateTopicByID(id int64, description string) error
+	UpdateTopicByID(updatedTopic *domain.Topic) error
 
 	CreatePost(newPost *domain.Post) (int64, error)
 	GetPostByID(id int64) (*domain.Post, error)
 	GetPostsWithOptions(options *domain.SearchPostsOptions) ([]domain.Post, error)
 	CountPostsFromAuthorID(userID int64) (int64, error)
 	UpdatePostByID(updatedPost *domain.Post) error
-	MarkPostAsDeletedByID(id int64, reason string, moderatorID int64) error
+	MarkPostAsDeletedByID(id int64, at time.Time, reason string, moderatorID int64) error
 
 	CreateComment(newComment *domain.Comment) (int64, error)
 	GetCommentByID(id int64) (*domain.Comment, error)
 	GetCommentsWithOptions(options *domain.SearchCommentsOptions) ([]domain.Comment, error)
 	UpdateCommentByID(updatedComment *domain.Comment) error
-	MarkCommentAsDeletedByID(id int64, reason string, moderatorID int64) error
+	MarkCommentAsDeletedByID(id int64, at time.Time, reason string, moderatorID int64) error
 
 	CreateTag(newTag *domain.Tag) (int64, error)
 	GetTagByID(id int64) (*domain.Tag, error)
