@@ -28,6 +28,15 @@ func (s *APIServices) GetTagByID(id int64) (*domain.Tag, *SvcError) {
 	return tag, nil
 }
 
+func (s *APIServices) GetTagID(tag string) (int64, *SvcError) {
+	topicID, err := s.repo.GetTagID(tag)
+	if err != nil {
+		return 0, newErrInternal(err) // TODO: error handling when topic does not exist
+	}
+
+	return topicID, nil
+}
+
 func (s *APIServices) SearchTags(options *domain.SearchTagsOptions) ([]domain.Tag, *SvcError) {
 	tags, err := s.repo.GetTagsWithOptions(options)
 	if err != nil {

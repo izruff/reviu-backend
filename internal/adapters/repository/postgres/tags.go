@@ -26,6 +26,15 @@ func (r *PostgresRepository) GetTagByID(id int64) (*domain.Tag, error) {
 	return tag, nil
 }
 
+func (r *PostgresRepository) GetTagID(tag string) (int64, error) {
+	var tagID int64
+	if err := r.selectOne(&tagID, "tags", "id", "tag=$1", tag); err != nil {
+		return 0, err // TODO: error handling when user does not exist
+	}
+
+	return tagID, nil
+}
+
 func (r *PostgresRepository) GetTagsWithOptions(options *domain.SearchTagsOptions) ([]domain.Tag, error) {
 	var whereQuery, orderBy string
 	var queryArgs []interface{}

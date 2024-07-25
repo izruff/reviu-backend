@@ -29,6 +29,7 @@ type Service interface {
 
 	CreateTopic(topic string) (int64, *SvcError)
 	GetTopicByID(id int64) (*domain.Topic, *SvcError)
+	GetTopicID(topic string) (int64, *SvcError)
 	UpdateTopicByID(id int64, description string) *SvcError
 	SearchTopics(options *domain.SearchTopicsOptions) ([]domain.Topic, *SvcError)
 
@@ -52,6 +53,7 @@ type Service interface {
 
 	CreateTag(tag string) (int64, *SvcError)
 	GetTagByID(id int64) (*domain.Tag, *SvcError)
+	GetTagID(tag string) (int64, *SvcError)
 	SearchTags(options *domain.SearchTagsOptions) ([]domain.Tag, *SvcError)
 }
 

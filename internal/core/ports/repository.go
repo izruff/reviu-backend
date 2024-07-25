@@ -37,6 +37,7 @@ type Repository interface {
 
 	CreateTag(newTag *domain.Tag) (int64, error)
 	GetTagByID(id int64) (*domain.Tag, error)
+	GetTagID(tag string) (int64, error)
 	GetTagsWithOptions(options *domain.SearchTagsOptions) ([]domain.Tag, error)
 
 	CreateTaggedPost(newTaggedPost *domain.TaggedPost) error

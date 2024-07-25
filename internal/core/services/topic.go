@@ -28,6 +28,15 @@ func (s *APIServices) GetTopicByID(id int64) (*domain.Topic, *SvcError) {
 	return topic, nil
 }
 
+func (s *APIServices) GetTopicID(topic string) (int64, *SvcError) {
+	topicID, err := s.repo.GetTopicID(topic)
+	if err != nil {
+		return 0, newErrInternal(err) // TODO: error handling when topic does not exist
+	}
+
+	return topicID, nil
+}
+
 func (s *APIServices) UpdateTopicByID(id int64, description string) *SvcError {
 	if err := s.repo.UpdateTopicByID(id, description); err != nil {
 		// TODO: error handling when user does not exist
