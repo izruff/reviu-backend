@@ -12,4 +12,9 @@ type User struct {
 	About        null.String `db:"about" json:"about"`
 	CreatedAt    null.Time   `db:"created_at" json:"createdAt"`
 	Rating       null.Int    `db:"rating" json:"rating"`
+
+	// Cached
+	FollowerCount  null.Int `db:"-" json:"followerCount"`
+	FollowingCount null.Int `db:"-" json:"followingCount"`
+	PostCount      null.Int `db:"-" json:"postCount"`
 }

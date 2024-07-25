@@ -72,19 +72,41 @@ func (s *APIServices) Signup(email string, username string, password string) (in
 }
 
 func (s *APIServices) GetUserByID(id int64) (*domain.User, *SvcError) {
+	user, cErr := s.cache.GetUserFieldsByID(id, "modRole", "username", "nickname", "about", "createdAt", "rating")
+	if cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
+	} else {
+		return user, nil
+	}
+
 	user, err := s.repo.GetUserByID(id)
 	if err != nil {
 		// TODO: error handling when user does not exist
 		return nil, newErrInternal(err)
 	}
 
+	if cErr = s.cache.SetUserFieldsByID(id, user); cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
+	}
+
 	return user, nil
 }
 
 func (s *APIServices) GetUserIDByUsername(username string) (int64, *SvcError) {
+	userID, cErr := s.cache.GetUserIDByUsername(username)
+	if cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
+	} else {
+		return userID, nil
+	}
+
 	userID, err := s.repo.GetUserIDByUsername(username)
 	if err != nil {
 		return 0, newErrInternal(err) // TODO: error handling when user does not exist
+	}
+
+	if cErr = s.cache.SetUserIDByUsername(username, userID); cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
 	}
 
 	return userID, nil
@@ -97,6 +119,10 @@ func (s *APIServices) UpdateUserByID(id int64, updatedUser *domain.User) *SvcErr
 	if err := s.repo.UpdateUserByID(updatedUser); err != nil {
 		// TODO: error handling when user does not exist
 		return newErrInternal(err)
+	}
+
+	if cErr := s.cache.SetUserFieldsByID(id, updatedUser); cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
 	}
 
 	return nil
@@ -157,9 +183,21 @@ func (s *APIServices) GetUserFollowers(id int64) ([]domain.User, *SvcError) {
 }
 
 func (s *APIServices) GetUserFollowerCount(id int64) (int64, *SvcError) {
+	user, cErr := s.cache.GetUserFieldsByID(id, "followerCount")
+	if cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
+	} else {
+		return user.FollowerCount.Int64, nil
+	}
+
 	count, err := s.repo.CountFollowersFromUserID(id)
 	if err != nil {
 		return 0, newErrInternal(err) // TODO: error handling when user does not exist
+	}
+
+	user.FollowerCount.SetValid(count)
+	if cErr := s.cache.SetUserFieldsByID(id, user); cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
 	}
 
 	return count, nil
@@ -184,26 +222,49 @@ func (s *APIServices) GetUserFollowings(id int64) ([]domain.User, *SvcError) {
 }
 
 func (s *APIServices) GetUserFollowingCount(id int64) (int64, *SvcError) {
+	user, cErr := s.cache.GetUserFieldsByID(id, "followingCount")
+	if cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
+	} else {
+		return user.FollowingCount.Int64, nil
+	}
+
 	count, err := s.repo.CountFollowingsFromUserID(id)
 	if err != nil {
 		return 0, newErrInternal(err) // TODO: error handling when user does not exist
+	}
+
+	user.FollowingCount.SetValid(count)
+	if cErr := s.cache.SetUserFieldsByID(id, user); cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
 	}
 
 	return count, nil
 }
 
 func (s *APIServices) GetUserPostCount(id int64) (int64, *SvcError) {
+	user, cErr := s.cache.GetUserFieldsByID(id, "postCount")
+	if cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
+	} else {
+		return user.PostCount.Int64, nil
+	}
+
 	count, err := s.repo.CountPostsFromAuthorID(id)
 	if err != nil {
 		return 0, newErrInternal(err) // TODO: error handling when user does not exist
+	}
+
+	user.PostCount.SetValid(count)
+	if cErr := s.cache.SetUserFieldsByID(id, user); cErr != nil {
+		print(cErr.Err.Error()) // CacheTODO
 	}
 
 	return count, nil
 }
 
 func (s *APIServices) GetUserRating(id int64) (int64, *SvcError) {
-	// TODO: create the column in database
-
+	// TODO
 	return 0, nil
 }
 

@@ -2,6 +2,9 @@ package redis
 
 import (
 	"context"
+	"errors"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/izruff/reviu-backend/internal/core/ports"
@@ -49,7 +52,7 @@ func (c *RedisCache) setWithExpiry(key string, value interface{}, expiration tim
 	return nil
 }
 
-func (c *RedisCache) hset(key string, fieldMap map[string]interface{}) *CacheError {
+func (c *RedisCache) hset(key string, fieldMap map[string]string) *CacheError {
 	err := c.client.HSet(c.ctx, key, fieldMap).Err()
 	if err != nil {
 		return newErrRedis(err)
@@ -65,14 +68,18 @@ func (c *RedisCache) get(key string) (string, *CacheError) {
 	return value, nil
 }
 
-func (c *RedisCache) hmget(key string, fields ...string) (map[string]interface{}, *CacheError) {
+func (c *RedisCache) hmget(key string, fields ...string) (map[string]string, *CacheError) {
+	// Retrieves all fields; return error if any is missing
 	fieldValues, err := c.client.HMGet(c.ctx, key, fields...).Result()
 	if err != nil {
 		return nil, newErrRedis(err)
 	}
-	result := make(map[string]interface{}, len(fields))
+	result := make(map[string]string, len(fields))
 	for i, field := range fields {
-		result[field] = fieldValues[i]
+		if fieldValues[i] == nil {
+			return nil, newErrRedis(errors.New("some fields not found"))
+		}
+		result[field] = fieldValues[i].(string) // go-redis guarantees this is a string
 	}
 	return result, nil
 }
@@ -83,4 +90,20 @@ func (c *RedisCache) deleteAll(keys ...string) *CacheError {
 		return newErrRedis(err)
 	}
 	return nil
+}
+
+func joinAsKey(names ...interface{}) string {
+	strNames := make([]string, len(names))
+	for i, name := range names {
+		switch v := name.(type) {
+		case int64:
+			strNames[i] = strconv.FormatInt(v, 10)
+		case string:
+			strNames[i] = v
+		default:
+			// Since joinAsKey is called internally with known types, this should not happen
+			panic("unsupported type for Redis key naming")
+		}
+	}
+	return strings.Join(strNames, ":")
 }

@@ -2,25 +2,24 @@ package ports
 
 import "github.com/izruff/reviu-backend/internal/core/domain"
 
-// TODO: Create caches for paginated results
 type Cache interface {
-	GetUserByID(id int64) (*domain.User, *CacheError)
-	SetUserByID(id int64, updatedUser *domain.User) *CacheError
+	GetUserFieldsByID(id int64, fields ...string) (*domain.User, *CacheError)
+	SetUserFieldsByID(id int64, user *domain.User) *CacheError
 	GetUserIDByUsername(username string) (int64, *CacheError)
 	SetUserIDByUsername(username string, id int64) *CacheError
 
-	GetTopicByID(id int64) (*domain.Topic, *CacheError)
-	SetTopicByID(id int64, updatedTopic *domain.Topic) *CacheError
+	/*
+		GetTopicFieldsByID(id int64) (*domain.Topic, *CacheError)
+		SetTopicFieldsByID(id int64, updatedTopic *domain.Topic) *CacheError
 
-	GetPostByID(id int64) (*domain.Post, *CacheError)
-	SetPostByID(id int64, updatedPost *domain.Post) *CacheError
-	DeletePostByID(id int64) *CacheError
+		GetPostFieldsByID(id int64) (*domain.Post, *CacheError)
+		SetPostFieldsByID(id int64, post *domain.Post) *CacheError
 
-	GetCommentByID(id int64) (*domain.Comment, *CacheError)
-	SetCommentByID(id int64, updatedComment *domain.Comment) *CacheError
-	DeleteCommentByID(id int64) *CacheError
+		GetCommentFieldsByID(id int64) (*domain.Comment, *CacheError)
+		SetCommentFieldsByID(id int64, comment *domain.Comment) *CacheError
 
-	GetTagByID(id int64) (*domain.Tag, *CacheError)
+		GetTagFieldsByID(id int64) (*domain.Tag, *CacheError)
+	*/
 }
 
 // TODO: CacheError
